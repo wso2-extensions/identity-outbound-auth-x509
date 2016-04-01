@@ -63,8 +63,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.extension.identity.authenticator:
-                                    org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector
+                                    org.wso2.carbon.extension.identity.authenticator:org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector
                                 </bundleDef>
                             </bundles>
                         </configuration>

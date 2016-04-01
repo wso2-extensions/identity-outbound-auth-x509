@@ -1,4 +1,4 @@
-Product: WSO2 IS authenticator for clef
+Product: WSO2 IS authenticator for X509 Certificate
 Pre-requisites:
 
 - Maven 3.x
@@ -12,20 +12,18 @@ Tested Platform:
 
 Do the following:
 
-1. Navigate to identity-outbound-auth-Clef/org.wso2.carbon.identity.authenticator.Clef and build.
+1. Navigate to identity-outbound-auth-x509/org.wso2.carbon.identity.authenticator.x509Certificate and build.
 
-2. Place org.wso2.carbon.identity.authenticator jar into <IS_HOME>/repository/components/dropins.
+2. Place org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector jar into <IS_HOME>/repository/components/dropins.
 
-3. Place clefauthenticationendpoint war into <IS_HOME>/repository/deployment/server/webapps.
-
-4. Add a cliammapping for ClefId with mapping to any string attribute eg(eg:nickName)
+3. Add a cliammapping for Certificate with mapping to any string attribute eg(eg:nickName)
 
                 Description	       ClefId of user
-                Claim Uri	       http://wso2.org/claims/clefId
+                Claim Uri	       http://wso2.org/claims/userCertificate
                 Mapped Attribute       nickName
                 Regular Expression     null
                 Display Order	       0
                 Supported by Default   false
                 Required	       false
 
-5. Start the IS server and create Identity provider and service provider in IS via the IS console.
+4. Start the IS server and create Identity provider and service provider in IS via the IS console.
