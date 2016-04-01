@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.sample.servlet;
+package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.osgi.service.http.HttpService;
 

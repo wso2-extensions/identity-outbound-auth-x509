@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.sample.servlet;
+package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +33,14 @@ public class X509CertificateRealmServiceComponent {
     private static Log log = LogFactory.getLog(X509CertificateRealmServiceComponent.class);
     private static RealmService realmService = null;
 
+    public static RealmService getRealmService() {
+        return realmService;
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+    }
+
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Activating X509CertificateRealmServiceComponent ");
@@ -45,15 +53,7 @@ public class X509CertificateRealmServiceComponent {
         }
     }
 
-    protected void setRealmService(RealmService realmService) {
-        this.realmService = realmService;
-    }
-
     protected void unsetRealmService(RealmService realmService) {
         this.realmService = null;
-    }
-
-    public static RealmService getRealmService() {
-        return realmService;
     }
 }

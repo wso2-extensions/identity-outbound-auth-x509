@@ -16,12 +16,12 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.sample.servlet;
+package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import javax.servlet.http.HttpSession;
 
 public class X509CertificateSessionHolder {
-    private final ThreadLocal<HttpSession> threadLocal = new ThreadLocal<HttpSession>();
+    private final ThreadLocal<HttpSession> threadLocal = new ThreadLocal<>();
 
     public void set(HttpSession session) {
         threadLocal.set(session);
