@@ -20,17 +20,33 @@ package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import javax.servlet.http.HttpSession;
 
+/**
+ * Handle sessions.
+ */
 public class X509CertificateSessionHolder {
     private final ThreadLocal<HttpSession> threadLocal = new ThreadLocal<>();
 
+    /**
+     * Set session.
+     *
+     * @param session http session
+     */
     public void set(HttpSession session) {
         threadLocal.set(session);
     }
 
+    /**
+     * Get session.
+     *
+     * @return http session
+     */
     public HttpSession get() {
         return threadLocal.get();
     }
 
+    /**
+     * Remove session.
+     */
     public void remove() {
         threadLocal.remove();
     }

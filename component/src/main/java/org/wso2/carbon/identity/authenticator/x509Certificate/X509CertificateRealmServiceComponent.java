@@ -33,26 +33,51 @@ public class X509CertificateRealmServiceComponent {
     private static Log log = LogFactory.getLog(X509CertificateRealmServiceComponent.class);
     private static RealmService realmService = null;
 
+    /**
+     * Get realm service.
+     *
+     * @return realm service
+     */
     public static RealmService getRealmService() {
         return realmService;
     }
 
+    /**
+     * Set realm service.
+     *
+     * @param realmService realm service
+     */
     protected void setRealmService(RealmService realmService) {
         this.realmService = realmService;
     }
 
+    /**
+     * Activate componentContext.
+     *
+     * @param componentContext component context
+     */
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Activating X509CertificateRealmServiceComponent ");
         }
     }
 
+    /**
+     * Deactivating componentContext.
+     *
+     * @param componentContext component context
+     */
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating X509CertificateRealmServiceComponent ");
         }
     }
 
+    /**
+     * Unset realm service.
+     *
+     * @param realmService realm service
+     */
     protected void unsetRealmService(RealmService realmService) {
         this.realmService = null;
     }

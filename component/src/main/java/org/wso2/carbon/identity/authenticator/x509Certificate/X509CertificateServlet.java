@@ -27,16 +27,35 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 
+/**
+ * X509 Certificate Servlet.
+ */
 public class X509CertificateServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7182121722709941646L;
 
+    /**
+     * Servlet doGet.
+     *
+     * @param servletRequest  servlet request
+     * @param servletResponse servlet response
+     * @throws ServletException servlet failed exception
+     * @throws IOException      IO failed exception
+     */
     @Override
     protected void doGet(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
             throws ServletException, IOException {
         doPost(servletRequest, servletResponse);
     }
 
+    /**
+     * Servlet doPost.
+     *
+     * @param servletRequest  servlet request
+     * @param servletResponse servlet response
+     * @throws ServletException servlet failed exception
+     * @throws IOException      IO failed exception
+     */
     @Override
     protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
             throws ServletException, IOException {
@@ -51,7 +70,3 @@ public class X509CertificateServlet extends HttpServlet {
         }
     }
 }
-
-
-
-

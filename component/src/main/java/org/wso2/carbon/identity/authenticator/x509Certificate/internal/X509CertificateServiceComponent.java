@@ -45,6 +45,11 @@ import java.util.Hashtable;
 public class X509CertificateServiceComponent {
     private static Log log = LogFactory.getLog(X509CertificateServiceComponent.class);
 
+    /**
+     * Activate service.
+     *
+     * @param componentContext component context
+     */
     protected void activate(ComponentContext componentContext) {
         X509CertificateAuthenticator authenticator = new X509CertificateAuthenticator();
         Hashtable<String, String> props = new Hashtable<>();
@@ -62,12 +67,22 @@ public class X509CertificateServiceComponent {
         log.info("X509 Certificate Servlet activated successfully..");
     }
 
+    /**
+     * Deactivate service.
+     *
+     * @param componentContext component context
+     */
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("X509 Certificate Servlet is deactivated ");
         }
     }
 
+    /**
+     * Set httpservice.
+     *
+     * @param httpService http service
+     */
     protected void setHttpService(HttpService httpService) {
         X509CertificateDataHolder.getInstance().setHttpService(httpService);
         if (log.isDebugEnabled()) {
@@ -75,6 +90,11 @@ public class X509CertificateServiceComponent {
         }
     }
 
+    /**
+     * Unset httpservice.
+     *
+     * @param httpService http service
+     */
     protected void unsetHttpService(HttpService httpService) {
         X509CertificateDataHolder.getInstance().setHttpService(null);
         if (log.isDebugEnabled()) {

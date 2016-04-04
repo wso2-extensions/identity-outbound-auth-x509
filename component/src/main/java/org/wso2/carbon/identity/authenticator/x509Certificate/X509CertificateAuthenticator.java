@@ -85,7 +85,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throws AuthenticationFailedException {
         AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
         String userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
-        Object object = httpServletRequest.getAttribute(X509CertificateConstants.X509Certificate);
+        Object object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
         if (object != null) {
             X509Certificate[] certificates = (X509Certificate[]) object;
             if (certificates.length > 0) {

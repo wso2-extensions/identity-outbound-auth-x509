@@ -31,6 +31,11 @@ public class X509CertificateDataHolder {
     private X509CertificateDataHolder() {
     }
 
+    /**
+     * Get data holder instance.
+     *
+     * @return data holder instance
+     */
     public static X509CertificateDataHolder getInstance() {
         if (dataHolder == null) {
             synchronized (X509CertificateDataHolder.class) {
@@ -43,10 +48,20 @@ public class X509CertificateDataHolder {
         return dataHolder;
     }
 
+    /**
+     * Get http service.
+     *
+     * @return http service
+     */
     public HttpService getHttpService() {
         return httpService;
     }
 
+    /**
+     * Set http service.
+     *
+     * @return http service
+     */
     public void setHttpService(HttpService httpService) {
         this.httpService = httpService;
     }

@@ -19,12 +19,15 @@
 
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
+/**
+ * X509 Certificate authenticator constants
+ */
 public class X509CertificateConstants {
     public static final String AUTHENTICATOR_NAME = "x509Certificate";
     public static final String AUTHENTICATOR_FRIENDLY_NAME = "X509Certificate";
     public static final String USER_CERTIFICATE = "http://wso2.org/claims/userCertificate";
     public static final String DEFAULT = "Default";
-    public static final String X509Certificate = "javax.servlet.request.X509Certificate";
+    public static final String X_509_CERTIFICATE = "javax.servlet.request.X509Certificate";
     public static final String SESSION_DATA_KEY = "sessionDataKey";
     public static final String COMMON_AUTH = "commonauth";
     public static final String SERVLET_URL = "/x509-certificate-servlet";
