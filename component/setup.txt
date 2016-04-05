@@ -18,7 +18,7 @@ Do the following:
 
 3. Add a cliammapping for Certificate with mapping to any string attribute eg(eg:nickName)
 
-                Description	       ClefId of user
+                Description	       Certificate of the user
                 Claim Uri	       http://wso2.org/claims/userCertificate
                 Mapped Attribute       nickName
                 Regular Expression     null
