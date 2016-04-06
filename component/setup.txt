@@ -1,0 +1,29 @@
+Product: WSO2 IS authenticator for X509 Certificate
+Pre-requisites:
+
+- Maven 3.x
+- Java 1.6 or above
+
+Tested Platform: 
+
+- UBUNTU 14.04
+- WSO2 IS 5.1.0
+- Java 1.7
+
+Do the following:
+
+1. Navigate to identity-outbound-auth-x509/org.wso2.carbon.identity.authenticator.x509Certificate and build.
+
+2. Place org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector jar into <IS_HOME>/repository/components/dropins.
+
+3. Add a cliammapping for Certificate with mapping to any string attribute eg(eg:nickName)
+
+                Description	       Certificate of the user
+                Claim Uri	       http://wso2.org/claims/userCertificate
+                Mapped Attribute       nickName
+                Regular Expression     null
+                Display Order	       0
+                Supported by Default   false
+                Required	       false
+
+4. Start the IS server and create Identity provider and service provider in IS via the IS console.
