@@ -41,7 +41,6 @@ import java.util.Hashtable;
  * unbind="unsetHttpService"
  */
 
-
 public class X509CertificateServiceComponent {
     private static Log log = LogFactory.getLog(X509CertificateServiceComponent.class);
 
@@ -60,11 +59,10 @@ public class X509CertificateServiceComponent {
         try {
             X509CertificateDataHolder.getInstance().getHttpService()
                     .registerServlet(X509CertificateConstants.SERVLET_URL, servlet, null, null);
+            log.info("X509 Certificate Servlet activated successfully..");
         } catch (NamespaceException | ServletException e) {
-            throw new RuntimeException(
-                    "Error when registering X509 Certificate Servlet via the HttpService.", e);
+            throw new RuntimeException("Error when registering X509 Certificate Servlet via the HttpService.", e);
         }
-        log.info("X509 Certificate Servlet activated successfully..");
     }
 
     /**
@@ -101,5 +99,4 @@ public class X509CertificateServiceComponent {
             log.debug("HTTP Service is unset in the X509 Certificate Servlet");
         }
     }
-
 }

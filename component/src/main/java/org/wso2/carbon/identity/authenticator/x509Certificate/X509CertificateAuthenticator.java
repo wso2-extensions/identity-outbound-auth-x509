@@ -98,7 +98,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 try {
                     data = cert.getEncoded();
                 } catch (CertificateEncodingException e) {
-                    throw new AuthenticationFailedException("Encoded certificate not found", e);
+                    throw new AuthenticationFailedException("Encoded certificate in not found", e);
                 }
                 X509CertificateUtil certificateUtil = new X509CertificateUtil();
                 if (certificateUtil.isEmpty(userName)) {
@@ -106,9 +106,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     authenticationContext.setSubject(AuthenticatedUser
                             .createLocalAuthenticatedUserFromSubjectIdentifier(userName));
                 } else {
-                    certificateUtil.validateCerts(userName, data);
-                    authenticationContext.setSubject(AuthenticatedUser
-                            .createLocalAuthenticatedUserFromSubjectIdentifier(userName));
+                    if (certificateUtil.validateCerts(userName, data)) {
+                        authenticationContext.setSubject(AuthenticatedUser
+                                .createLocalAuthenticatedUserFromSubjectIdentifier(userName));
+                    } else {
+                        throw new AuthenticationFailedException("X509Certificate is not valid");
+                    }
                 }
             } else {
                 throw new AuthenticationFailedException("X509Certificate object is null");
@@ -120,6 +123,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
+     * Check canHandle.
+     *
      * @param httpServletRequest http request
      * @return boolean status
      */
@@ -128,6 +133,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
+     * Get context identifier.
+     *
      * @param httpServletRequest http request
      * @return authenticator contextIdentifier
      */
@@ -136,6 +143,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
+     * Get the authenticator name.
+     *
      * @return authenticator name
      */
     public String getName() {
@@ -143,6 +152,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
+     * Get authenticator friendly name.
+     *
      * @return authenticator friendly name
      */
     public String getFriendlyName() {
@@ -150,7 +161,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
-     * Get username
+     * Get username.
      *
      * @param authenticationContext authentication context
      * @return username username

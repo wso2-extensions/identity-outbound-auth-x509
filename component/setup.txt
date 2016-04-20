@@ -14,7 +14,8 @@ Do the following:
 
 1. Navigate to identity-outbound-auth-x509/org.wso2.carbon.identity.authenticator.x509Certificate and build.
 
-2. Place org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector jar into <IS_HOME>/repository/components/dropins.
+2. Place org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector jar into
+    <IS_HOME>/repository/components/dropins.
 
 3. Add a cliammapping for Certificate with mapping to any string attribute eg(eg:nickName)
 
@@ -26,4 +27,94 @@ Do the following:
                 Supported by Default   false
                 Required	       false
 
-4. Start the IS server and create Identity provider and service provider in IS via the IS console.
+4. Navigate to <IS_HOME>/repository/conf/tomcat and Edit the catalina-server.xml of your Tomcat and add the following
+    connector (change the path to your jks file):
+                <Connector
+                        protocol="HTTP/1.1"
+                        port="8443" maxThreads="200"
+                        scheme="https" secure="true" SSLEnabled="true"
+                        keystoreFile="/path/to/keystore.jks" keystorePass="keystorepwd"
+                        truststoreFile="/path/to/truststore.jks" truststorePass="cacertspassword"
+                        clientAuth="want" sslProtocol="TLS"/>
+
+5. Start the IS server and create Identity provider and service provider in IS via the IS console.
+
+
+
+Prepare keystore
+----------------
+
+1.Create a CA
+*First check wether you have installed openssl by issuing
+   openssl version -d
+*Create a key pair
+   openssl genrsa -out ca.key 1024
+Sample input for the command
+
+ $ openssl req -new -x509 -days 3650 -key ca.key -out ca.crt
+You are about to be asked to enter information that will be incorporated into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:SK
+State or Province Name (full name) [Some-State]:Bratislava
+Locality Name (eg, city) []:Bratislava
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Naive
+Organizational Unit Name (eg, section) []:CA
+Common Name (eg, YOUR name) []:CA Admin
+Email Address []:ca@naive.sk
+As a result you will get root certificate ca.crt that will be imported to the browser.
+
+2.Create a server certificate
+*Create key pair
+  openssl genrsa -out localhost.key 2048
+
+*Create a certificate signing request
+ openssl req -new -key localhost.key -out localhost.csr
+
+Sample input
+$ openssl req -new -key localhost.key -out localhost.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:SK
+State or Province Name (full name) [Some-State]:Bratislava
+Locality Name (eg, city) []:Bratislava
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Other Company
+Organizational Unit Name (eg, section) []:IT
+Common Name (eg, YOUR name) []:localhost
+Email Address []:admin@other.sk
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+*Creating a certificate
+ openssl ca -keyfile ca.key -cert ca.crt -out localhost.crt -policy
+Sample input
+ $ openssl ca -keyfile ca.key -cert ca.crt -out localhost.crt -policy policy_anything -infiles localhost.csr
+Using configuration from /usr/lib/ssl/openssl.cnf
+Check that the request matches the signature
+Signature ok
+Certificate Details:
+...too long
+Sign the certificate? [y/n]:y
+
+*Getting a pkcs12 out of .crt file.That file will be used to import certificates into java keystore and import into browser
+ keytool -importkeystore -deststorepass changeit -destkeypass changeit  -destkeystore keystore.jks
+    -srckeystore ../../certtest/localhost.p12  -srcstoretype PKCS12 -alias sercer
+
+*Create a java key store with the server certificate(localhost.crt)
+ keytool -importkeystore -deststorepass changeit -destkeypass changeit  -destkeystore keystore.jks
+    -srckeystore ../../certtest/localhost.p12  -srcstoretype PKCS12 -alias sercer
+
+ 3.Create a client certificate
+* Follow the above discription until you get .p12 file
+4.Export the CA to java key store.
+*keytool -import -keystore kestore.jks -storepass changeit -alias my_ca -file ../../certtest/ca.crt
