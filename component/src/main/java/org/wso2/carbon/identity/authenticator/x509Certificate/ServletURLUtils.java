@@ -69,7 +69,7 @@ public class ServletURLUtils {
     }
 
     /**
-     * Get the password expiration days.
+     * Get the user endpoint Url.
      */
     public static String getUserAuthEndpoint() {
         if (properties.get(USER_AUTH_ENDPOINT) != null) {
