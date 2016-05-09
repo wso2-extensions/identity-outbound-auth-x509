@@ -57,7 +57,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throws AuthenticationFailedException {
         String authEndpoint = null;
         try {
-            authEndpoint = X509CertificateConstants.AUTH_ENDPOINT;
+            authEndpoint = ServletURLUtils.getUserAuthEndpoint();
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(authenticationContext
                     .getQueryParams(), authenticationContext.getCallerSessionKey(), authenticationContext
                     .getContextIdentifier());
