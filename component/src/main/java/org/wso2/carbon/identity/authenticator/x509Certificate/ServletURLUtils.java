@@ -32,9 +32,8 @@ public class ServletURLUtils {
     public static final String IDM_PROPERTIES_FILE = "identity-mgt.properties";
     public static final String USER_AUTH_ENDPOINT = "x509-certificate-servlet";
     public static final String DEFAULT_AUTH_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
-
-    private static Properties properties = new Properties();
     private static final Log log = LogFactory.getLog(ServletURLUtils.class);
+    private static Properties properties = new Properties();
 
     static {
         loadProperties();

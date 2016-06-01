@@ -47,7 +47,7 @@ public class X509CertificateServiceComponent {
     /**
      * Activate service.
      *
-     * @param componentContext component context
+     * @param componentContext component context.
      */
     protected void activate(ComponentContext componentContext) {
         X509CertificateAuthenticator authenticator = new X509CertificateAuthenticator();
@@ -68,7 +68,7 @@ public class X509CertificateServiceComponent {
     /**
      * Deactivate service.
      *
-     * @param componentContext component context
+     * @param componentContext component context.
      */
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
@@ -91,7 +91,7 @@ public class X509CertificateServiceComponent {
     /**
      * Unset httpservice.
      *
-     * @param httpService http service
+     * @param httpService http service.
      */
     protected void unsetHttpService(HttpService httpService) {
         X509CertificateDataHolder.getInstance().setHttpService(null);

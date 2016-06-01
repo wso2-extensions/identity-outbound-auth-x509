@@ -20,7 +20,7 @@
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 /**
- * X509 Certificate authenticator constants
+ * X509 Certificate authenticator constants.
  */
 public class X509CertificateConstants {
     public static final String AUTHENTICATOR_NAME = "x509Certificate";
