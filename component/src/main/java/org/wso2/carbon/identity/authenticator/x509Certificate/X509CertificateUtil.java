@@ -30,16 +30,16 @@ import org.wso2.carbon.user.core.service.RealmService;
 import javax.security.cert.X509Certificate;
 
 /**
- * Working with certificate and claims store
+ * Working with certificate and claims store.
  */
 public class X509CertificateUtil extends AbstractAdmin {
 
     /**
      * Get certificate from claims.
      *
-     * @param userName name of the user
-     * @return x509 certificate
-     * @throws AuthenticationFailedException authentication failed exception
+     * @param userName name of the user.
+     * @return x509 certificate.
+     * @throws AuthenticationFailedException authentication failed exception.
      */
     private static X509Certificate getCertificate(String userName)
             throws AuthenticationFailedException {
@@ -72,10 +72,10 @@ public class X509CertificateUtil extends AbstractAdmin {
     /**
      * Add certificate into claims.
      *
-     * @param userName         name of the user
-     * @param certificateBytes x509 certificate
-     * @return boolean status of the action
-     * @throws AuthenticationFailedException authentication failed exception
+     * @param userName         name of the user.
+     * @param certificateBytes x509 certificate.
+     * @return boolean status of the action.
+     * @throws AuthenticationFailedException authentication failed exception.
      */
     public synchronized boolean addCertificate(String userName, byte[] certificateBytes)
             throws AuthenticationFailedException {
@@ -96,9 +96,9 @@ public class X509CertificateUtil extends AbstractAdmin {
     /**
      * Validate the certificate against with given certificate.
      *
-     * @param userName         name of the user
-     * @param certificateBytes x509 certificate
-     * @return boolean status of the action
+     * @param userName         name of the user.
+     * @param certificateBytes x509 certificate.
+     * @return boolean status of the action.
      * @throws AuthenticationFailedException
      */
     public synchronized boolean validateCerts(String userName, byte[] certificateBytes)
@@ -115,8 +115,8 @@ public class X509CertificateUtil extends AbstractAdmin {
     /**
      * Check availability of certificate.
      *
-     * @param userName name of the user
-     * @return boolean status of availability
+     * @param userName name of the user.
+     * @return boolean status of availability.
      */
     public synchronized boolean isEmpty(String userName) throws AuthenticationFailedException {
         return getCertificate(userName) == null;
