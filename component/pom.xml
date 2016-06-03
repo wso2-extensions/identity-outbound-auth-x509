@@ -18,7 +18,8 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector</artifactId>
+    <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector
+    </artifactId>
     <version>1.0.0</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Authenticator Library For X509Certificate</name>
@@ -78,14 +79,29 @@
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.authenticator.x509Certificate.internal,
-                            org.wso2.carbon.identity.authenticator.x509Certificate.*,
+                            org.wso2.carbon.identity.authenticator.x509Certificate.*;
+                            version="${identity.application.auth.x509.package.export.version}",
                         </Export-Package>
                         <Import-Package>
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
-                            org.wso2.carbon.base.*,
-                            org.wso2.carbon.user.core.*,
-                            *;resolution:=optional
+                            javax.servlet; version="${javax.servlet.version}",
+                            javax.servlet.http; version="${imp.pkg.version.javax.servlet}",
+                            org.apache.oltu.oauth2.*; version="${oltu.package.import.version.range}",
+                            org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
+                            org.apache.commons.logging; version="${commons-logging.osgi.version.range}",
+                            org.apache.commons.codec.binary; version="${commons-codec.wso2.osgi.version.range}",
+                            org.osgi.framework; version="${osgi.framework.imp.pkg.version.range}",
+                            org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
+                            org.wso2.carbon.identity.application.authentication.framework.*;
+                            version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.application.common.model;
+                            version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.application.authenticator.oidc;
+                            version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.application.authenticator.openid;
+                            version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.identity.core.util;
+                            version="${carbon.identity.package.import.version.range}",
+                            org.wso2.carbon.ui; version="${carbon.kernel.package.import.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>

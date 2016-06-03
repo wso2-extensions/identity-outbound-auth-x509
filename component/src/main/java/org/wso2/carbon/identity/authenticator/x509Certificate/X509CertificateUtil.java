@@ -48,15 +48,16 @@ public class X509CertificateUtil extends AbstractAdmin {
         RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();
         int tenantID = MultitenantConstants.SUPER_TENANT_ID;
         try {
-            if (userName.contains("@")) {
-                tenantID = realmService.getTenantManager().getTenantId(userName.substring(userName.lastIndexOf("@") + 1));
+            if (userName.contains(X509CertificateConstants.AT_SIGN)) {
+                tenantID = realmService.getTenantManager().getTenantId(userName
+                        .substring(userName.lastIndexOf(X509CertificateConstants.AT_SIGN) + 1));
             }
             userStoreManager = realmService.getTenantUserRealm(tenantID).getUserStoreManager();
             String certificate;
             if (userStoreManager.getUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,
                     X509CertificateConstants.DEFAULT) != null) {
-                certificate = userStoreManager.getUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,
-                        X509CertificateConstants.DEFAULT);
+                certificate = userStoreManager.getUserClaimValue(userName, X509CertificateConstants
+                        .USER_CERTIFICATE, X509CertificateConstants.DEFAULT);
             } else {
                 return null;
             }
@@ -82,7 +83,8 @@ public class X509CertificateUtil extends AbstractAdmin {
         X509Certificate x509Certificate;
         try {
             x509Certificate = X509Certificate.getInstance(certificateBytes);
-            org.wso2.carbon.user.core.UserStoreManager userStoreManager = getUserRealm().getUserStoreManager();
+            org.wso2.carbon.user.core.UserStoreManager userStoreManager = getUserRealm()
+                    .getUserStoreManager();
             userStoreManager.setUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,
                     Base64.encode(x509Certificate.getEncoded()), X509CertificateConstants.DEFAULT);
         } catch (javax.security.cert.CertificateException e) {
