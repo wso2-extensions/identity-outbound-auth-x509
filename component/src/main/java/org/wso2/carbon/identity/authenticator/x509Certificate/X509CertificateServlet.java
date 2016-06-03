@@ -29,6 +29,8 @@ import java.net.URLEncoder;
 
 /**
  * X509 Certificate Servlet.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateServlet extends HttpServlet {
 

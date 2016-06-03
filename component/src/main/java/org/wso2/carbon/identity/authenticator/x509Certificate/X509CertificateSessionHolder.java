@@ -22,6 +22,8 @@ import javax.servlet.http.HttpSession;
 
 /**
  * Handle sessions.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateSessionHolder {
     private final ThreadLocal<HttpSession> threadLocal = new ThreadLocal<>();

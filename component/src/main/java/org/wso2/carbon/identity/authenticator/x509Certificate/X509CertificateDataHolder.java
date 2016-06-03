@@ -22,6 +22,8 @@ import org.osgi.service.http.HttpService;
 
 /**
  * Singleton class to hold HTTP Service.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateDataHolder {
 

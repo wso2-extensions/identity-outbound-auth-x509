@@ -37,6 +37,8 @@ import java.security.cert.X509Certificate;
 
 /**
  * Authenticator of X509Certificate.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateAuthenticator extends AbstractApplicationAuthenticator implements
         LocalApplicationAuthenticator {

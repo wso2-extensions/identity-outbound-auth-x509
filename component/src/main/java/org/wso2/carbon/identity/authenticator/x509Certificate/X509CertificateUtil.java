@@ -31,6 +31,8 @@ import javax.security.cert.X509Certificate;
 
 /**
  * Working with certificate and claims store.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateUtil extends AbstractAdmin {
 
