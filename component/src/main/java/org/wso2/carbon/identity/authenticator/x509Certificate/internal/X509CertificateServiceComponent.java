@@ -42,7 +42,7 @@ import java.util.Hashtable;
  */
 
 public class X509CertificateServiceComponent {
-    private static Log log = LogFactory.getLog(X509CertificateServiceComponent.class);
+    final private static Log log = LogFactory.getLog(X509CertificateServiceComponent.class);
 
     /**
      * Activate service.
