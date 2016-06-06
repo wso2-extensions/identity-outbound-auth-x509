@@ -1,4 +1,4 @@
-### is-outbound-auth-x509
+### Welcome to the WSO2 Identity Server (IS) X509 authenticator.
 
 Welcome to the WSO2 Identity Server (IS) X509 Certificate authenticator.
 
