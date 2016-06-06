@@ -45,7 +45,7 @@ Prepare keystore
 ----------------
 
 1.Create a CA
-*First check wether you have installed openssl by issuing
+*First check whether you have installed openssl by issuing
    openssl version -d
 *Create a key pair
    openssl genrsa -out ca.key 1024
