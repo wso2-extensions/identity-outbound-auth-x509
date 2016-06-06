@@ -66,9 +66,11 @@
         </dependency>
     </dependencies>
     <scm>
-        <connection>scm:git:https://github.com/wso2-extensions/identity-outbound-auth-x509.git</connection>
+        <connection>scm:git:https://github.com/wso2-extensions/identity-outbound-auth-x509.git
+        </connection>
         <url>https://github.com/wso2-extensions/identity-outbound-auth-x509.git</url>
-        <developerConnection>scm:git:https://github.com/wso2-extensions/identity-outbound-auth-x509.git
+        <developerConnection>
+            scm:git:https://github.com/wso2-extensions/identity-outbound-auth-x509.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>
