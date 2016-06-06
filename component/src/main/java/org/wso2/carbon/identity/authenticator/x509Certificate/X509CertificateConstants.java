@@ -25,7 +25,7 @@ package org.wso2.carbon.identity.authenticator.x509Certificate;
  * @since 1.0.0
  */
 public class X509CertificateConstants {
-    public static final String AUTHENTICATOR_NAME = "x509Certificate";
+    public static final String AUTHENTICATOR_NAME = "x509CertificateAuthenticator";
     public static final String AUTHENTICATOR_FRIENDLY_NAME = "X509Certificate";
     public static final String USER_CERTIFICATE = "http://wso2.org/claims/userCertificate";
     public static final String DEFAULT = "Default";
@@ -34,6 +34,8 @@ public class X509CertificateConstants {
     public static final String COMMON_AUTH = "commonauth";
     public static final String SERVLET_URL = "/x509-certificate-servlet";
     public static final String UTF_8 = "UTF-8";
+    public static final String AUTH_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
+    public static final String AUTHENTICATION_ENDPOINT = "AuthenticationEndpoint";
     public static final String AT_SIGN = "@";
 
 }

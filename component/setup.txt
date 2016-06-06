@@ -17,10 +17,7 @@ Do the following:
 2. Place org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector jar into
     <IS_HOME>/repository/components/dropins.
 
-3. Edit the <IS_HOME>/repository/conf/identity/identity-mgt.properties directory and add the servlet url following property.
-   x509-certificate-servlet=https://localhost:8443/x509-certificate-servlet
-
-4. Add a cliammapping for Certificate with mapping to any string attribute eg(eg:nickName)
+3. Add a cliammapping for Certificate with mapping to any string attribute eg(eg:nickName)
 
                 Description	       Certificate of the user
                 Claim Uri	       http://wso2.org/claims/userCertificate
@@ -30,7 +27,7 @@ Do the following:
                 Supported by Default   false
                 Required	       false
 
-5. Navigate to <IS_HOME>/repository/conf/tomcat and Edit the catalina-server.xml of your Tomcat and add the following
+4. Navigate to <IS_HOME>/repository/conf/tomcat and Edit the catalina-server.xml of your Tomcat and add the following
     connector (change the path to your jks file):
                 <Connector
                         protocol="HTTP/1.1"
@@ -40,7 +37,7 @@ Do the following:
                         truststoreFile="/path/to/truststore.jks" truststorePass="cacertspassword"
                         clientAuth="want" sslProtocol="TLS"/>
 
-6. Start the IS server and create Identity provider and service provider in IS via the IS console.
+5. Start the IS server and create Identity provider and service provider in IS via the IS console.
 
 
 
@@ -48,7 +45,7 @@ Prepare keystore
 ----------------
 
 1.Create a CA
-*First check wether you have installed openssl by issuing
+*First check whether you have installed openssl by issuing
    openssl version -d
 *Create a key pair
    openssl genrsa -out ca.key 1024
