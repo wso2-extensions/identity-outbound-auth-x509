@@ -21,7 +21,9 @@ package org.wso2.carbon.identity.authenticator.x509Certificate;
 import org.osgi.service.http.HttpService;
 
 /**
- * Singleton class to hold HTTP Service
+ * Singleton class to hold HTTP Service.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateDataHolder {
 
@@ -34,7 +36,7 @@ public class X509CertificateDataHolder {
     /**
      * Get data holder instance.
      *
-     * @return data holder instance
+     * @return data holder instance.
      */
     public static X509CertificateDataHolder getInstance() {
         if (dataHolder == null) {
@@ -44,7 +46,6 @@ public class X509CertificateDataHolder {
                 }
             }
         }
-
         return dataHolder;
     }
 
@@ -60,10 +61,9 @@ public class X509CertificateDataHolder {
     /**
      * Set http service.
      *
-     * @return http service
+     * @return http service.
      */
     public void setHttpService(HttpService httpService) {
         this.httpService = httpService;
     }
-
 }

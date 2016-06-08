@@ -36,7 +36,7 @@ public class X509CertificateRealmServiceComponent {
     /**
      * Get realm service.
      *
-     * @return realm service
+     * @return realm service.
      */
     public static RealmService getRealmService() {
         return realmService;
@@ -45,7 +45,7 @@ public class X509CertificateRealmServiceComponent {
     /**
      * Set realm service.
      *
-     * @param realmService realm service
+     * @param realmService realm service.
      */
     protected void setRealmService(RealmService realmService) {
         this.realmService = realmService;
@@ -54,7 +54,7 @@ public class X509CertificateRealmServiceComponent {
     /**
      * Activate componentContext.
      *
-     * @param componentContext component context
+     * @param componentContext component context.
      */
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
@@ -65,7 +65,7 @@ public class X509CertificateRealmServiceComponent {
     /**
      * Deactivating componentContext.
      *
-     * @param componentContext component context
+     * @param componentContext component context.
      */
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
@@ -76,7 +76,7 @@ public class X509CertificateRealmServiceComponent {
     /**
      * Unset realm service.
      *
-     * @param realmService realm service
+     * @param realmService realm service.
      */
     protected void unsetRealmService(RealmService realmService) {
         this.realmService = null;

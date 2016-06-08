@@ -39,8 +39,6 @@ Do the following:
 
 5. Start the IS server and create Identity provider and service provider in IS via the IS console.
 
-
-
 Prepare keystore
 ----------------
 

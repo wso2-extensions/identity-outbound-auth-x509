@@ -29,6 +29,8 @@ import java.net.URLEncoder;
 
 /**
  * X509 Certificate Servlet.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateServlet extends HttpServlet {
 
@@ -37,10 +39,10 @@ public class X509CertificateServlet extends HttpServlet {
     /**
      * Servlet doGet.
      *
-     * @param servletRequest  servlet request
-     * @param servletResponse servlet response
-     * @throws ServletException servlet failed exception
-     * @throws IOException      IO failed exception
+     * @param servletRequest  servlet request.
+     * @param servletResponse servlet response.
+     * @throws ServletException servlet failed exception.
+     * @throws IOException      IO failed exception.
      */
     @Override
     protected void doGet(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
@@ -51,10 +53,10 @@ public class X509CertificateServlet extends HttpServlet {
     /**
      * Servlet doPost.
      *
-     * @param servletRequest  servlet request
-     * @param servletResponse servlet response
-     * @throws ServletException servlet failed exception
-     * @throws IOException      IO failed exception
+     * @param servletRequest  servlet request.
+     * @param servletResponse servlet response.
+     * @throws ServletException servlet failed exception.
+     * @throws IOException      IO failed exception.
      */
     @Override
     protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)

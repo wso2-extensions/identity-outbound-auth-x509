@@ -36,7 +36,9 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 /**
- * Authenticator of X509Certificate
+ * Authenticator of X509Certificate.
+ *
+ * @since 1.0.0
  */
 public class X509CertificateAuthenticator extends AbstractApplicationAuthenticator implements
         LocalApplicationAuthenticator {
@@ -45,9 +47,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * Initialize the process and call servlet .
      *
-     * @param httpServletRequest    http request
-     * @param httpServletResponse   http response
-     * @param authenticationContext authentication context
+     * @param httpServletRequest    http request.
+     * @param httpServletResponse   http response.
+     * @param authenticationContext authentication context.
      * @throws AuthenticationFailedException
      */
     @Override
@@ -67,21 +69,23 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(authenticationContext
                     .getQueryParams(), authenticationContext.getCallerSessionKey(), authenticationContext
                     .getContextIdentifier());
-            httpServletResponse.sendRedirect(httpServletResponse.encodeRedirectURL(authEndpoint + ("?" + queryParams)));
+            httpServletResponse.sendRedirect(httpServletResponse.encodeRedirectURL(authEndpoint
+                    + ("?" + queryParams)));
             if (log.isDebugEnabled()) {
                 log.debug("Request send to " + authEndpoint);
             }
         } catch (IOException e) {
-            throw new AuthenticationFailedException("Error when sending to the login page :" + authEndpoint, e);
+            throw new AuthenticationFailedException("Error when sending to the login page :"
+                    + authEndpoint, e);
         }
     }
 
     /**
      * Validate the certificate.
      *
-     * @param httpServletRequest    http request
-     * @param httpServletResponse   http response
-     * @param authenticationContext authentication context
+     * @param httpServletRequest    http request.
+     * @param httpServletResponse   http response.
+     * @param authenticationContext authentication context.
      * @throws AuthenticationFailedException
      */
     @Override
@@ -125,7 +129,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         } else {
             throw new AuthenticationFailedException("X509Certificate not found");
         }
-
     }
 
     /**
@@ -141,8 +144,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * Get context identifier.
      *
-     * @param httpServletRequest http request
-     * @return authenticator contextIdentifier
+     * @param httpServletRequest http request.
+     * @return authenticator contextIdentifier.
      */
     public String getContextIdentifier(HttpServletRequest httpServletRequest) {
         return httpServletRequest.getParameter(X509CertificateConstants.SESSION_DATA_KEY);
@@ -151,7 +154,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * Get the authenticator name.
      *
-     * @return authenticator name
+     * @return authenticator name.
      */
     public String getName() {
         return X509CertificateConstants.AUTHENTICATOR_NAME;
@@ -160,7 +163,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * Get authenticator friendly name.
      *
-     * @return authenticator friendly name
+     * @return authenticator friendly name.
      */
     public String getFriendlyName() {
         return X509CertificateConstants.AUTHENTICATOR_FRIENDLY_NAME;
@@ -169,8 +172,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * Get username.
      *
-     * @param authenticationContext authentication context
-     * @return username username
+     * @param authenticationContext authentication context.
+     * @return username username.
      */
     private AuthenticatedUser getUsername(AuthenticationContext authenticationContext) {
         AuthenticatedUser authenticatedUser = null;
