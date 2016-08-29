@@ -59,13 +59,16 @@ public class X509CertificateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
             throws ServletException, IOException {
-        String commonAuthURL = IdentityUtil.getServerURL(X509CertificateConstants.COMMON_AUTH, false, true);
+        String commonAuthURL = IdentityUtil
+                .getServerURL(X509CertificateConstants.COMMON_AUTH, false, true);
         String param = servletRequest.getParameter(X509CertificateConstants.SESSION_DATA_KEY);
         if (param == null) {
-            throw new IllegalArgumentException(X509CertificateConstants.SESSION_DATA_KEY + " parameter is null.");
+            throw new IllegalArgumentException(X509CertificateConstants.SESSION_DATA_KEY
+                    + " parameter is null.");
         } else {
-            commonAuthURL += "?" + X509CertificateConstants.SESSION_DATA_KEY + "=" + URLEncoder.encode(param,
-                    X509CertificateConstants.UTF_8);
+            commonAuthURL += "?" + X509CertificateConstants.SESSION_DATA_KEY + "="
+                    + URLEncoder.encode(param, X509CertificateConstants.UTF_8) + "&"
+                    + X509CertificateConstants.SUCCESS + "=true";
             servletResponse.sendRedirect(commonAuthURL);
         }
     }

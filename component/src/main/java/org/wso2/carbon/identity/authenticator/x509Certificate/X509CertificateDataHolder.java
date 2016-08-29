@@ -44,7 +44,6 @@ public class X509CertificateDataHolder {
                 }
             }
         }
-
         return dataHolder;
     }
 
@@ -65,5 +64,4 @@ public class X509CertificateDataHolder {
     public void setHttpService(HttpService httpService) {
         this.httpService = httpService;
     }
-
 }

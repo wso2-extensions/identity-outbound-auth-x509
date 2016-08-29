@@ -55,8 +55,8 @@ public class X509CertificateUtil extends AbstractAdmin {
             String certificate;
             if (userStoreManager.getUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,
                     X509CertificateConstants.DEFAULT) != null) {
-                certificate = userStoreManager.getUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,
-                        X509CertificateConstants.DEFAULT);
+                certificate = userStoreManager.getUserClaimValue(userName,
+                        X509CertificateConstants.USER_CERTIFICATE, X509CertificateConstants.DEFAULT);
             } else {
                 return null;
             }
@@ -79,9 +79,8 @@ public class X509CertificateUtil extends AbstractAdmin {
      */
     public synchronized boolean addCertificate(String userName, byte[] certificateBytes)
             throws AuthenticationFailedException {
-        X509Certificate x509Certificate;
         try {
-            x509Certificate = X509Certificate.getInstance(certificateBytes);
+            X509Certificate x509Certificate = X509Certificate.getInstance(certificateBytes);
             org.wso2.carbon.user.core.UserStoreManager userStoreManager = getUserRealm().getUserStoreManager();
             userStoreManager.setUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,
                     Base64.encode(x509Certificate.getEncoded()), X509CertificateConstants.DEFAULT);
@@ -118,7 +117,7 @@ public class X509CertificateUtil extends AbstractAdmin {
      * @param userName name of the user
      * @return boolean status of availability
      */
-    public synchronized boolean isEmpty(String userName) throws AuthenticationFailedException {
-        return getCertificate(userName) == null;
+    public synchronized boolean isCertificateExist(String userName) throws AuthenticationFailedException {
+        return getCertificate(userName) != null;
     }
 }

@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
@@ -28,12 +29,18 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
+import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Authenticator of X509Certificate
@@ -41,6 +48,7 @@ import java.security.cert.X509Certificate;
 public class X509CertificateAuthenticator extends AbstractApplicationAuthenticator implements
         LocalApplicationAuthenticator {
     private static Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
+    private String certificateUserName;
 
     /**
      * Initialize the process and call servlet .
@@ -64,15 +72,17 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             } else {
                 authEndpoint = X509CertificateConstants.AUTH_ENDPOINT;
             }
-            String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(authenticationContext
-                    .getQueryParams(), authenticationContext.getCallerSessionKey(), authenticationContext
-                    .getContextIdentifier());
-            httpServletResponse.sendRedirect(httpServletResponse.encodeRedirectURL(authEndpoint + ("?" + queryParams)));
+            String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(
+                    authenticationContext.getQueryParams(), authenticationContext.getCallerSessionKey(),
+                    authenticationContext.getContextIdentifier());
+            httpServletResponse.sendRedirect(httpServletResponse.encodeRedirectURL(authEndpoint
+                    + ("?" + queryParams)));
             if (log.isDebugEnabled()) {
                 log.debug("Request send to " + authEndpoint);
             }
         } catch (IOException e) {
-            throw new AuthenticationFailedException("Error when sending to the login page :" + authEndpoint, e);
+            throw new AuthenticationFailedException("Error when sending to the login page :"
+                    + authEndpoint, e);
         }
     }
 
@@ -89,8 +99,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                                                  HttpServletResponse httpServletResponse,
                                                  AuthenticationContext authenticationContext)
             throws AuthenticationFailedException {
-        AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
-        String userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
         Object object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
         if (object != null) {
             X509Certificate[] certificates = (X509Certificate[]) object;
@@ -106,18 +114,27 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 } catch (CertificateEncodingException e) {
                     throw new AuthenticationFailedException("Encoded certificate in not found", e);
                 }
-                X509CertificateUtil certificateUtil = new X509CertificateUtil();
-                if (certificateUtil.isEmpty(userName)) {
-                    certificateUtil.addCertificate(userName, data);
-                    authenticationContext.setSubject(AuthenticatedUser
-                            .createLocalAuthenticatedUserFromSubjectIdentifier(userName));
+                String certAttributes = cert.getSubjectX500Principal().getName();
+                Map<ClaimMapping, String> claims;
+                claims = getSubjectAttributes(certAttributes);
+                AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
+                String userName;
+                if (authenticatedUser != null) {
+                    userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
                 } else {
-                    if (certificateUtil.validateCerts(userName, data)) {
-                        authenticationContext.setSubject(AuthenticatedUser
-                                .createLocalAuthenticatedUserFromSubjectIdentifier(userName));
-                    } else {
-                        throw new AuthenticationFailedException("X509Certificate is not valid");
-                    }
+                    userName = getCertificateUserName();
+                }
+                if (!StringUtils.isNotEmpty(userName)) {
+                    throw new AuthenticationFailedException("username can't be empty");
+                }
+                X509CertificateUtil certificateUtil = new X509CertificateUtil();
+                if (!certificateUtil.isCertificateExist(userName)) {
+                    certificateUtil.addCertificate(userName, data);
+                    allowUser(userName, claims, cert, authenticationContext);
+                } else if (certificateUtil.validateCerts(userName, data)) {
+                    allowUser(userName, claims, cert, authenticationContext);
+                } else {
+                    throw new AuthenticationFailedException("X509Certificate is not valid");
                 }
             } else {
                 throw new AuthenticationFailedException("X509Certificate object is null");
@@ -125,7 +142,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         } else {
             throw new AuthenticationFailedException("X509Certificate not found");
         }
-
     }
 
     /**
@@ -135,7 +151,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @return boolean status
      */
     public boolean canHandle(HttpServletRequest httpServletRequest) {
-        return httpServletRequest.getParameter(X509CertificateConstants.SESSION_DATA_KEY) != null;
+        return httpServletRequest.getParameter(X509CertificateConstants.SUCCESS) != null;
     }
 
     /**
@@ -183,5 +199,72 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             }
         }
         return authenticatedUser;
+    }
+
+    /**
+     * @param certAttributes principal attributes from certificate.
+     * @return claim map
+     * @throws AuthenticationFailedException
+     */
+    protected Map<ClaimMapping, String> getSubjectAttributes(String certAttributes)
+            throws AuthenticationFailedException {
+        Map<ClaimMapping, String> claims = new HashMap<>();
+        LdapName ldapDN;
+        try {
+            ldapDN = new LdapName(certAttributes);
+        } catch (InvalidNameException e) {
+            throw new AuthenticationFailedException("error occurred while get the certificate claims", e);
+        }
+        String userNameAttribute = null;
+        if (getAuthenticatorConfig().getParameterMap()
+                .get(X509CertificateConstants.USERNAME) != null) {
+            userNameAttribute = getAuthenticatorConfig().getParameterMap()
+                    .get(X509CertificateConstants.USERNAME);
+        }
+        for (Rdn distinguishNames : ldapDN.getRdns()) {
+            claims.put(ClaimMapping.build(distinguishNames.getType(), distinguishNames.getType(),
+                    null, false), String.valueOf(distinguishNames.getValue()));
+            if (!StringUtils.isEmpty(userNameAttribute)) {
+                if (userNameAttribute.equals(distinguishNames.getType())) {
+                    setCertificateUserName(String.valueOf(distinguishNames.getValue()));
+                }
+            }
+        }
+        return claims;
+    }
+
+    /**
+     * Set the user userName from certificate.
+     *
+     * @param userName The username.
+     */
+    private void setCertificateUserName(String userName) {
+        this.certificateUserName = userName;
+    }
+
+    /**
+     * Get the username from the certificate.
+     *
+     * @return the username.
+     */
+    private String getCertificateUserName() {
+        return certificateUserName;
+    }
+
+    /**
+     * Allow user login into system.
+     *
+     * @param userName              username of the user.
+     * @param claims                claim map.
+     * @param cert                  x509 certificate.
+     * @param authenticationContext authentication context.
+     */
+    private void allowUser(String userName, Map claims, X509Certificate cert,
+                           AuthenticationContext authenticationContext) {
+        AuthenticatedUser authenticatedUserObj;
+        authenticatedUserObj = AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(userName);
+        authenticatedUserObj.setAuthenticatedSubjectIdentifier(String.valueOf(cert.getSerialNumber()));
+        authenticatedUserObj.setUserAttributes(claims);
+        authenticationContext.setSubject(authenticatedUserObj);
     }
 }
