@@ -37,9 +37,13 @@ Do the following:
                         truststoreFile="/path/to/truststore.jks" truststorePass="cacertspassword"
                         clientAuth="want" sslProtocol="TLS"/>
 
-5. Start the IS server and create Identity provider and service provider in IS via the IS console.
+5. Add the AuthenticationEndpoint and username in application-authentication.xml (<IS_HOME>/repository/conf/identity)
+        <AuthenticatorConfig name="x509CertificateAuthenticator" enabled="true">
+            <Parameter name="AuthenticationEndpoint">https://localhost:8443/x509-certificate-servlet</Parameter>
+            <Parameter name="username">CN</Parameter>
+        </AuthenticatorConfig>
 
-
+6. Start the IS server and create Identity provider and service provider in IS via the IS console.
 
 Prepare keystore
 ----------------
@@ -88,7 +92,7 @@ State or Province Name (full name) [Some-State]:Bratislava
 Locality Name (eg, city) []:Bratislava
 Organization Name (eg, company) [Internet Widgits Pty Ltd]:Other Company
 Organizational Unit Name (eg, section) []:IT
-Common Name (eg, YOUR name) []:localhost
+Common Name (eg, YOUR name) []:admin
 Email Address []:admin@other.sk
 
 Please enter the following 'extra' attributes

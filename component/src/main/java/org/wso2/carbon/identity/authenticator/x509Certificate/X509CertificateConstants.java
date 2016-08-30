@@ -34,4 +34,6 @@ public class X509CertificateConstants {
     public static final String UTF_8 = "UTF-8";
     public static final String AUTH_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
     public static final String AUTHENTICATION_ENDPOINT = "AuthenticationEndpoint";
+    public static final String USERNAME = "username";
+    public static final String SUCCESS = "success";
 }
