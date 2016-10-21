@@ -20,12 +20,12 @@
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.apache.axiom.om.util.Base64;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.security.cert.X509Certificate;
 
@@ -46,11 +46,9 @@ public class X509CertificateUtil extends AbstractAdmin {
         X509Certificate x509Certificate;
         UserStoreManager userStoreManager;
         RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();
-        int tenantID = MultitenantConstants.SUPER_TENANT_ID;
         try {
-            if (userName.contains("@")) {
-                tenantID = realmService.getTenantManager().getTenantId(userName.substring(userName.lastIndexOf("@") + 1));
-            }
+            String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+            int tenantID = realmService.getTenantManager().getTenantId(tenantDomain);
             userStoreManager = realmService.getTenantUserRealm(tenantID).getUserStoreManager();
             String certificate;
             if (userStoreManager.getUserClaimValue(userName, X509CertificateConstants.USER_CERTIFICATE,

@@ -114,7 +114,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 } catch (CertificateEncodingException e) {
                     throw new AuthenticationFailedException("Encoded certificate in not found", e);
                 }
-                String certAttributes = cert.getSubjectX500Principal().getName();
+                String certAttributes = String.valueOf(cert.getSubjectX500Principal());
                 Map<ClaimMapping, String> claims;
                 claims = getSubjectAttributes(certAttributes);
                 AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
