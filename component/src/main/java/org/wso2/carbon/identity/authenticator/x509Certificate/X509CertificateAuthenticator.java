@@ -75,8 +75,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(
                     authenticationContext.getQueryParams(), authenticationContext.getCallerSessionKey(),
                     authenticationContext.getContextIdentifier());
-            httpServletResponse.sendRedirect(httpServletResponse.encodeRedirectURL(authEndpoint
-                    + ("?" + queryParams)));
+            String encodedUrl = (authEndpoint + ("?" + queryParams));
+            httpServletResponse.sendRedirect(encodedUrl);
             if (log.isDebugEnabled()) {
                 log.debug("Request send to " + authEndpoint);
             }
