@@ -23,20 +23,19 @@ import org.apache.axiom.om.util.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.core.AbstractAdmin;
 import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.apache.commons.lang.StringUtils;
-import sun.security.ssl.Debug;
 
+import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,7 +52,7 @@ public class X509CertificateUtil {
      * @return x509 certificate
      * @throws AuthenticationFailedException authentication failed exception
      */
-    private static X509Certificate getCertificate(String username) throws AuthenticationFailedException {
+    public static X509Certificate getCertificate(String username) throws AuthenticationFailedException {
         X509Certificate x509Certificate;
         UserRealm userRealm = getUserRealm(username);
         try {
@@ -112,7 +111,7 @@ public class X509CertificateUtil {
                 throw new AuthenticationFailedException("Cannot find the user realm for the given tenant domain : " +
                         CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             }
-        } catch (javax.security.cert.CertificateException e) {
+        } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while retrieving certificate of user: " + username, e);
         } catch (UserStoreException e) {
             throw new AuthenticationFailedException("Error while setting certificate of user: " + username, e);
@@ -133,7 +132,7 @@ public class X509CertificateUtil {
      * @return boolean status of the action
      * @throws AuthenticationFailedException
      */
-    public synchronized boolean validateCerts(String userName, byte[] certificateBytes)
+    public static synchronized boolean validateCerts(String userName, byte[] certificateBytes)
             throws AuthenticationFailedException {
         X509Certificate x509Certificate;
         try {
@@ -170,7 +169,7 @@ public class X509CertificateUtil {
         if (log.isDebugEnabled()) {
             log.debug("AuthenticatorConfig is not provided for " + X509CertificateConstants.AUTHENTICATOR_NAME);
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     /**
@@ -206,7 +205,7 @@ public class X509CertificateUtil {
             log.debug("Getting userRealm for user: " + username);
         }
         try {
-            if (username != null) {
+            if (StringUtils.isNotEmpty(username)) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
                 RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();

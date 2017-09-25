@@ -80,9 +80,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                      errorPageUrl = errorPage + ("?sessionDataKey=" + authenticationContext.getContextIdentifier()) +
                                     "&authenticators=" + getName() +
                                     X509CertificateConstants.RETRY_PARAM_FOR_AUTHENTICATION_FAILED;
-                    if (log.isDebugEnabled()) {
-                        log.debug("Redirect to 'Authentication failed' error page: " + errorPageUrl);
-                    }
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Redirect to error page: " + errorPageUrl);

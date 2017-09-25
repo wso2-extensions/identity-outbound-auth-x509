@@ -131,5 +131,4 @@
     <script src="libs/bootstrap_3.3.5/js/bootstrap.min.js"></script>
     </body>
     </html>
-</fmt:bundl
-e>
+</fmt:bundle>
