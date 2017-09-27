@@ -28,6 +28,7 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -49,7 +50,6 @@ import java.util.Map;
 public class X509CertificateAuthenticator extends AbstractApplicationAuthenticator implements
         LocalApplicationAuthenticator {
     private static Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
-    private String certificateUserName;
 
     /**
      * Initialize the process and call servlet .
@@ -64,45 +64,35 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                                                  HttpServletResponse httpServletResponse,
                                                  AuthenticationContext authenticationContext)
             throws AuthenticationFailedException {
-        String authEndpoint = X509CertificateConstants.AUTH_ENDPOINT;;
         try {
             if (authenticationContext.isRetrying()) {
-                String errorPage = IdentityUtil.getServerURL(X509CertificateConstants.ERROR_PAGE, false, false);
-                String errorPageUrl;
-                if (authenticationContext.getProperty(X509CertificateConstants.AUTHENTICATION_FAILED).equals
-                        (X509CertificateConstants.CERTIFICATE_NOT_FOUND)) {
-                     errorPageUrl = errorPage + ("?sessionDataKey=" + authenticationContext.getContextIdentifier()) +
-                                    "&authenticators=" + getName() +
-                                    X509CertificateConstants.RETRY_PARAM_FOR_CHECKING_CERTIFICATE;
+                String errorPageUrl = IdentityUtil.getServerURL(X509CertificateConstants.ERROR_PAGE, false, false);
+                String redirectUrl = errorPageUrl + ("?" + FrameworkConstants.SESSION_DATA_KEY + "="
+                        + authenticationContext.getContextIdentifier()) + "&" + X509CertificateConstants.AUTHENTICATORS
+                        + "=" + getName() + X509CertificateConstants.RETRY_PARAM_FOR_CHECKING_CERTIFICATE
+                        + X509CertificateConstants.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE;
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE, "");
 
-                    authenticationContext.setProperty(X509CertificateConstants.AUTHENTICATION_FAILED, "");
-                }else{
-                     errorPageUrl = errorPage + ("?sessionDataKey=" + authenticationContext.getContextIdentifier()) +
-                                    "&authenticators=" + getName() +
-                                    X509CertificateConstants.RETRY_PARAM_FOR_AUTHENTICATION_FAILED;
-                }
                 if (log.isDebugEnabled()) {
-                    log.debug("Redirect to error page: " + errorPageUrl);
+                    log.debug("Redirect to error page: " + redirectUrl);
                 }
-                httpServletResponse.sendRedirect(errorPageUrl);
+                httpServletResponse.sendRedirect(redirectUrl);
             } else {
-                String authEndpointParam = getAuthenticatorConfig().getParameterMap().
-                        get(X509CertificateConstants.AUTHENTICATION_ENDPOINT);
-                if (StringUtils.isNotEmpty(authEndpointParam)) {
-                    authEndpoint = authEndpointParam;
+                String authEndpoint = getAuthenticatorConfig().getParameterMap().
+                        get(X509CertificateConstants.AUTHENTICATION_ENDPOINT_PARAMETER);
+                if (StringUtils.isEmpty(authEndpoint)) {
+                    authEndpoint = X509CertificateConstants.AUTHENTICATION_ENDPOINT;
                 }
                 String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(
                         authenticationContext.getQueryParams(), authenticationContext.getCallerSessionKey(),
                         authenticationContext.getContextIdentifier());
-                String encodedUrl = (authEndpoint + ("?" + queryParams));
-                httpServletResponse.sendRedirect(encodedUrl);
                 if (log.isDebugEnabled()) {
                     log.debug("Request sent to " + authEndpoint);
                 }
+                httpServletResponse.sendRedirect(authEndpoint + ("?" + queryParams));
             }
         } catch (IOException e) {
-            throw new AuthenticationFailedException("Exception while redirecting to the login page :" + authEndpoint,
-                    e);
+            throw new AuthenticationFailedException("Exception while redirecting to the login page", e);
         }
     }
 
@@ -122,9 +112,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         Object object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
         if (object != null) {
             X509Certificate[] certificates;
-            if(object instanceof X509Certificate[]){
+            if (object instanceof X509Certificate[]) {
                 certificates = (X509Certificate[]) object;
-            }else {
+            } else {
                 throw new AuthenticationFailedException("Exception while casting the X509Certificate");
             }
             if (certificates.length > 0) {
@@ -140,21 +130,37 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 }
                 String certAttributes = String.valueOf(cert.getSubjectX500Principal());
                 Map<ClaimMapping, String> claims;
-                claims = getSubjectAttributes(certAttributes);
+                claims = getSubjectAttributes(authenticationContext, certAttributes);
                 AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
                 String userName;
                 if (authenticatedUser != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Authenticated username is: " + authenticatedUser);
+                    }
                     userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
                 } else {
-                    userName = getCertificateUserName();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Getting X509Certificate username");
+                    }
+                    userName = (String) authenticationContext.getProperty(X509CertificateConstants
+                            .X509_CERTIFICATE_USERNAME);
                 }
                 if (StringUtils.isEmpty(userName)) {
                     throw new AuthenticationFailedException("username can't be empty");
                 }
                 if (!X509CertificateUtil.isCertificateExist(userName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("X509Certificate does not exit for user: " + userName);
+                    }
                     X509CertificateUtil.addCertificate(userName, data);
                     allowUser(userName, claims, cert, authenticationContext);
+                    if (log.isDebugEnabled()) {
+                        log.debug("X509Certificate added and allowed to user: " + userName);
+                    }
                 } else if (X509CertificateUtil.validateCerts(userName, data)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("X509Certificate exits and getting validated");
+                    }
                     allowUser(userName, claims, cert, authenticationContext);
                 } else {
                     throw new AuthenticationFailedException("X509Certificate is not valid");
@@ -163,8 +169,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 throw new AuthenticationFailedException("X509Certificate object is null");
             }
         } else {
-            authenticationContext.setProperty(X509CertificateConstants.AUTHENTICATION_FAILED,
-                    X509CertificateConstants.CERTIFICATE_NOT_FOUND);
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE);
             throw new AuthenticationFailedException("Unable to find X509 Certificate in browser");
         }
     }
@@ -227,11 +233,13 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
-     * @param certAttributes principal attributes from certificate.
+     * @param authenticationContext authentication context
+     * @param certAttributes        principal attributes from certificate.
      * @return claim map
      * @throws AuthenticationFailedException
      */
-    protected Map<ClaimMapping, String> getSubjectAttributes(String certAttributes)
+    protected Map<ClaimMapping, String> getSubjectAttributes(AuthenticationContext authenticationContext, String
+            certAttributes)
             throws AuthenticationFailedException {
         Map<ClaimMapping, String> claims = new HashMap<>();
         LdapName ldapDN;
@@ -252,29 +260,15 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     null, false), String.valueOf(distinguishNames.getValue()));
             if (StringUtils.isNotEmpty(userNameAttribute)) {
                 if (userNameAttribute.equals(distinguishNames.getType())) {
-                    setCertificateUserName(String.valueOf(distinguishNames.getValue()));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding the X509Certificate username attribute");
+                    }
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, String
+                            .valueOf(distinguishNames.getValue()));
                 }
             }
         }
         return claims;
-    }
-
-    /**
-     * Set the user userName from certificate.
-     *
-     * @param userName The username.
-     */
-    private void setCertificateUserName(String userName) {
-        this.certificateUserName = userName;
-    }
-
-    /**
-     * Get the username from the certificate.
-     *
-     * @return the username.
-     */
-    private String getCertificateUserName() {
-        return certificateUserName;
     }
 
     /**

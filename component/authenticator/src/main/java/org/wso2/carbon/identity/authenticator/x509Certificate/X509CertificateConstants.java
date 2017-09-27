@@ -24,7 +24,7 @@ package org.wso2.carbon.identity.authenticator.x509Certificate;
  */
 public class X509CertificateConstants {
     /*
-	 * Private Constructor will prevent the instantiation of this class directly.
+     * Private Constructor will prevent the instantiation of this class directly.
 	 */
     private X509CertificateConstants() {
     }
@@ -38,16 +38,16 @@ public class X509CertificateConstants {
     public static final String COMMON_AUTH = "commonauth";
     public static final String SERVLET_URL = "/x509-certificate-servlet";
     public static final String UTF_8 = "UTF-8";
-    public static final String AUTH_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
-    public static final String AUTHENTICATION_ENDPOINT = "AuthenticationEndpoint";
+    public static final String AUTHENTICATION_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
+    public static final String AUTHENTICATION_ENDPOINT_PARAMETER = "AuthenticationEndpoint";
     public static final String USERNAME = "username";
     public static final String SUCCESS = "success";
-    public static final String RETRY_PARAM_FOR_AUTHENTICATION_FAILED =
-            "&authFailure=true&authFailureMsg=authentication.fail.message";
-    public static final String RETRY_PARAM_FOR_CHECKING_CERTIFICATE = "&authFailure=true&authFailureMsg=certificate" +
-            ".not.found";
+    public static final String RETRY_PARAM_FOR_CHECKING_CERTIFICATE =
+            "&authFailure=true&errorCode=";
     public static final String ERROR_PAGE = "x509certificateauthenticationendpoint/x509CertificateError.jsp";
-    public static final String AUTHENTICATION_FAILED = "authenticationFailed";
-    public static final String CERTIFICATE_NOT_FOUND = "certificateNotFound";
     public static final String CLAIM_URI = "setClaimURI";
+    public static final String AUTHENTICATORS = "authenticators";
+    public static final String X509_CERTIFICATE_ERROR_CODE = "X509CertificateErrorCode";
+    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "404";
+    public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
 }

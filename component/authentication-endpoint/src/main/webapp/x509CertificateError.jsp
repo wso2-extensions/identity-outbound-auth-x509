@@ -35,19 +35,18 @@
             idpAuthenticatorMapping = (Map<String, String>) request.getAttribute(Constants.IDP_AUTHENTICATOR_MAP);
         }
 
-        String errorMessage = resourceBundle.getString("authentication.failed.message");
+        String errorCode = resourceBundle.getString("unknown.error.code");
         String authenticationFailed = "false";
+        String errorMessage = resourceBundle.getString("unknown.error.message");
 
-        if (Boolean.parseBoolean(request.getParameter(Constants.AUTH_FAILURE))) {
+        if (Boolean.parseBoolean(request.getParameter("authFailure"))) {
             authenticationFailed = "true";
 
-            if (request.getParameter(Constants.AUTH_FAILURE_MSG) != null) {
-                errorMessage = request.getParameter(Constants.AUTH_FAILURE_MSG);
+            if (request.getParameter("errorCode") != null) {
+                errorCode = request.getParameter("errorCode");
 
-                if (errorMessage.equalsIgnoreCase("certificate.not.found")) {
+                if (errorCode.equalsIgnoreCase("404")) {
                     errorMessage = resourceBundle.getString("certificateNotFound.error.message");
-                } else {
-                errorMessage = resourceBundle.getString("authentication.failed.message");
                 }
             }
         }

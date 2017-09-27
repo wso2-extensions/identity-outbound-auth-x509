@@ -93,7 +93,7 @@ public class X509CertificateUtil {
      * @return boolean status of the action
      * @throws AuthenticationFailedException authentication failed exception
      */
-    public static synchronized boolean addCertificate(String username, byte[] certificateBytes)
+    public static boolean addCertificate(String username, byte[] certificateBytes)
             throws AuthenticationFailedException {
         Map<String, String> claims = new HashMap<>();
         UserRealm userRealm = getUserRealm(username);
@@ -132,19 +132,20 @@ public class X509CertificateUtil {
      * @return boolean status of the action
      * @throws AuthenticationFailedException
      */
-    public static synchronized boolean validateCerts(String userName, byte[] certificateBytes)
+    public static boolean validateCerts(String userName, byte[] certificateBytes)
             throws AuthenticationFailedException {
         X509Certificate x509Certificate;
+        boolean validateResult;
         try {
             x509Certificate = X509Certificate.getInstance(certificateBytes);
+            validateResult = x509Certificate.equals(getCertificate(userName));
         } catch (javax.security.cert.CertificateException e) {
             throw new AuthenticationFailedException("Error while retrieving certificate ", e);
         }
         if (log.isDebugEnabled()) {
-            log.debug("X509 certificate validation is completed. Result is " +
-                    x509Certificate.equals(getCertificate(userName)));
+            log.debug("X509 certificate validation is completed and the result is " + validateResult);
         }
-        return x509Certificate.equals(getCertificate(userName));
+        return validateResult;
     }
 
     /**
@@ -153,7 +154,7 @@ public class X509CertificateUtil {
      * @param userName name of the user
      * @return boolean status of availability
      */
-    public static synchronized boolean isCertificateExist(String userName) throws AuthenticationFailedException {
+    public static boolean isCertificateExist(String userName) throws AuthenticationFailedException {
         return getCertificate(userName) != null;
     }
 
@@ -173,9 +174,9 @@ public class X509CertificateUtil {
     }
 
     /**
-     * Get user claimURI value.
+     * Get X509Certificate claimURI value.
      *
-     * @return claimURI
+     * @return X509Certificate claimURI
      */
     public static String getClaimUri() {
         String claimURI = X509CertificateConstants.CLAIM_DIALECT_URI;
