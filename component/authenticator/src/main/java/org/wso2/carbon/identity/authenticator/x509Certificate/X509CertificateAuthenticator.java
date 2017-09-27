@@ -70,7 +70,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 String redirectUrl = errorPageUrl + ("?" + FrameworkConstants.SESSION_DATA_KEY + "="
                         + authenticationContext.getContextIdentifier()) + "&" + X509CertificateConstants.AUTHENTICATORS
                         + "=" + getName() + X509CertificateConstants.RETRY_PARAM_FOR_CHECKING_CERTIFICATE
-                        + X509CertificateConstants.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE;
+                        + authenticationContext.getProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE);
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE, "");
 
                 if (log.isDebugEnabled()) {
@@ -248,20 +248,18 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         } catch (InvalidNameException e) {
             throw new AuthenticationFailedException("error occurred while get the certificate claims", e);
         }
-        String userNameAttribute = null;
-        if (getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.USERNAME) != null) {
-            userNameAttribute = getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.USERNAME);
-            if (log.isDebugEnabled()) {
-                log.debug("Getting username attribute: " + userNameAttribute);
+        if (log.isDebugEnabled()) {
+                log.debug("Getting username attribute");
             }
-        }
+        String userNameAttribute = getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.USERNAME);
         for (Rdn distinguishNames : ldapDN.getRdns()) {
             claims.put(ClaimMapping.build(distinguishNames.getType(), distinguishNames.getType(),
                     null, false), String.valueOf(distinguishNames.getValue()));
             if (StringUtils.isNotEmpty(userNameAttribute)) {
                 if (userNameAttribute.equals(distinguishNames.getType())) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Adding the X509Certificate username attribute");
+                        log.debug("Setting X509Certificate username attribute: " + userNameAttribute
+                                + "and value is " + distinguishNames.getValue());
                     }
                     authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, String
                             .valueOf(distinguishNames.getValue()));
