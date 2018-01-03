@@ -14,7 +14,8 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.wso2.carbon.extension.identity.authenticator</groupId>
@@ -22,47 +23,25 @@
         <version>2.0.4-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector</artifactId>
+    <artifactId>org.wso2.carbon.extension.identity.x509Certificate.validation</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - X509Certificate Authenticator</name>
+    <name>WSO2 Carbon - X509Certificate Validation</name>
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
-            <scope>provided</scope>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.extension.identity.authenticator</groupId>
-            <artifactId>org.wso2.carbon.extension.identity.x509Certificate.validation</artifactId>
-            <scope>provided</scope>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.common</artifactId>
         </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-    </repositories>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.0.10</version>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -74,17 +53,19 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.identity.authenticator.x509Certificate.internal
+                            org.wso2.carbon.identity.x509Certificate.validation.internal
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.authenticator.x509Certificate.internal,
-                            org.wso2.carbon.identity.authenticator.x509Certificate.*,
+                            !org.wso2.carbon.identity.x509Certificate.validation.internal,
+                            org.wso2.carbon.identity.x509Certificate.validation.*,
                         </Export-Package>
                         <Import-Package>
+                            !javax.xml.namespace,
+                            javax.xml.namespace; version=0.0.0,
                             javax.servlet; version=2.4.0,
                             javax.servlet.http; version=2.4.0,
-                            org.wso2.carbon.base.*,
-                            org.wso2.carbon.user.core.*,
+                            org.wso2.carbon.identity.application.common.*;
+                            version="${carbon.identity.framework.imp.pkg.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
