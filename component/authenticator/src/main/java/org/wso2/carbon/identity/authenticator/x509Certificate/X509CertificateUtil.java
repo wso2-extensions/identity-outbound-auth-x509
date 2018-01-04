@@ -27,14 +27,19 @@ import org.wso2.carbon.identity.application.authentication.framework.config.buil
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationException;
+import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManager;
+import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManagerImpl;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.apache.commons.lang.StringUtils;
 
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +71,9 @@ public class X509CertificateUtil {
                     log.debug("The user certificate is " + userCertificate);
                 }
                 if (StringUtils.isNotEmpty(userCertificate)) {
-                    x509Certificate = X509Certificate.getInstance(Base64.decode(userCertificate));
+                    CertificateFactory cf = CertificateFactory.getInstance("X509");
+                    x509Certificate = (X509Certificate) cf.generateCertificate
+                            (new ByteArrayInputStream(Base64.decode(userCertificate)));
                 } else {
                     return null;
                 }
@@ -77,7 +84,7 @@ public class X509CertificateUtil {
                 throw new AuthenticationFailedException("Cannot find the user realm for the given tenant domain : " +
                         CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             }
-        } catch (javax.security.cert.CertificateException e) {
+        } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while decoding the certificate ", e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new AuthenticationFailedException("Error while user manager for tenant id ", e);
@@ -99,7 +106,9 @@ public class X509CertificateUtil {
         UserRealm userRealm = getUserRealm(username);
         try {
             if (userRealm != null) {
-                X509Certificate x509Certificate = X509Certificate.getInstance(certificateBytes);
+                CertificateFactory cf = CertificateFactory.getInstance("X509");
+                X509Certificate x509Certificate = (X509Certificate) cf.generateCertificate
+                        (new ByteArrayInputStream(certificateBytes));
                 claims.put(getClaimUri(), Base64.encode(x509Certificate.getEncoded()));
                 String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
                 userRealm.getUserStoreManager().setUserClaimValues(tenantAwareUsername, claims,
@@ -124,6 +133,33 @@ public class X509CertificateUtil {
         return true;
     }
 
+    public static void deleteCertificate(String username)
+            throws AuthenticationFailedException {
+        String[] claims = new String[1];
+        UserRealm userRealm = getUserRealm(username);
+        try {
+            if (userRealm != null) {
+                claims[0] = getClaimUri();
+                String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+                userRealm.getUserStoreManager().deleteUserClaimValues(tenantAwareUsername, claims,
+                        X509CertificateConstants.DEFAULT);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("UserRealm is null for username: " + username);
+                }
+                throw new AuthenticationFailedException("Cannot find the user realm for the given tenant domain : " +
+                        CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            }
+        } catch (UserStoreException e) {
+            throw new AuthenticationFailedException("Error while deleting certificate of user: " + username, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            throw new AuthenticationFailedException("Error while user manager for tenant id", e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("X509 certificate is deleted for user: " + username);
+        }
+    }
+
     /**
      * Validate the certificate against with given certificate.
      *
@@ -135,18 +171,45 @@ public class X509CertificateUtil {
     public static boolean validateCerts(String userName, byte[] certificateBytes)
             throws AuthenticationFailedException {
         X509Certificate x509Certificate;
-        boolean validateResult;
         try {
-            x509Certificate = X509Certificate.getInstance(certificateBytes);
-            validateResult = x509Certificate.equals(getCertificate(userName));
-        } catch (javax.security.cert.CertificateException e) {
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
+            x509Certificate = (X509Certificate) cf.generateCertificate
+                    (new ByteArrayInputStream(certificateBytes));
+            RevocationValidationManager revocationValidationManager = new RevocationValidationManagerImpl();
+            boolean isRevoked = revocationValidationManager.verifyRevocationStatus(x509Certificate);
+
+            if (isRevoked) {
+                if (X509CertificateUtil.isCertificateExist(userName) &&
+                        x509Certificate.equals(getCertificate(userName))) {
+                    X509CertificateUtil.deleteCertificate(userName);
+                }
+                return false;
+            } else {
+                if (!X509CertificateUtil.isCertificateExist(userName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("X509Certificate does not exit for user: " + userName);
+                    }
+                    X509CertificateUtil.addCertificate(userName, certificateBytes);
+                    if (log.isDebugEnabled()) {
+                        log.debug("X509Certificate is added to user: " + userName);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("X509Certificate exits and getting validated");
+                    }
+                    if (!x509Certificate.equals(getCertificate(userName))) {
+                        return false;
+                    }
+                }
+            }
+        } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while retrieving certificate ", e);
+        } catch (CertificateValidationException e) {
+            throw new AuthenticationFailedException("Error while validating certificate ", e);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("X509 certificate validation is completed and the result is " + validateResult);
-        }
-        return validateResult;
+        return true;
     }
+
 
     /**
      * Check availability of certificate.
