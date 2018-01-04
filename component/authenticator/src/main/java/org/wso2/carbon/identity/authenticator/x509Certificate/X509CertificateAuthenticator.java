@@ -148,20 +148,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 if (StringUtils.isEmpty(userName)) {
                     throw new AuthenticationFailedException("username can't be empty");
                 }
-                if (!X509CertificateUtil.isCertificateExist(userName)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate does not exit for user: " + userName);
-                    }
-                    X509CertificateUtil.addCertificate(userName, data);
+
+                if (X509CertificateUtil.validateCerts(userName, data)) {
                     allowUser(userName, claims, cert, authenticationContext);
                     if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate added and allowed to user: " + userName);
+                        log.debug("X509Certificate is allowed to user: " + userName);
                     }
-                } else if (X509CertificateUtil.validateCerts(userName, data)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate exits and getting validated");
-                    }
-                    allowUser(userName, claims, cert, authenticationContext);
                 } else {
                     throw new AuthenticationFailedException("X509Certificate is not valid");
                 }
