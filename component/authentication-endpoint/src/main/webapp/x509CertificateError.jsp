@@ -42,12 +42,8 @@
         if (Boolean.parseBoolean(request.getParameter("authFailure"))) {
             authenticationFailed = "true";
 
-            if (request.getParameter("errorCode") != null) {
-                errorCode = request.getParameter("errorCode");
-
-                if (errorCode.equalsIgnoreCase("404")) {
-                    errorMessage = resourceBundle.getString("certificateNotFound.error.message");
-                }
+            if (request.getParameter("errorMsg") != null) {
+                errorMessage = request.getParameter("errorMsg");
             }
         }
     %>

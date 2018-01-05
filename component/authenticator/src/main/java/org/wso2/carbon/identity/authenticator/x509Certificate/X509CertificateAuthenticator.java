@@ -70,8 +70,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 String redirectUrl = errorPageUrl + ("?" + FrameworkConstants.SESSION_DATA_KEY + "="
                         + authenticationContext.getContextIdentifier()) + "&" + X509CertificateConstants.AUTHENTICATORS
                         + "=" + getName() + X509CertificateConstants.RETRY_PARAM_FOR_CHECKING_CERTIFICATE
-                        + authenticationContext.getProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE);
-                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE, "");
+                        + authenticationContext.getProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE);
+                authenticationContext.setProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE, "");
 
                 if (log.isDebugEnabled()) {
                     log.debug("Redirect to error page: " + redirectUrl);
@@ -155,14 +155,16 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                         log.debug("X509Certificate is allowed to user: " + userName);
                     }
                 } else {
+                    authenticationContext.setProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE,
+                            X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_NOT_VALID_ERROR_CODE);
                     throw new AuthenticationFailedException("X509Certificate is not valid");
                 }
             } else {
                 throw new AuthenticationFailedException("X509Certificate object is null");
             }
         } else {
-            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                    X509CertificateConstants.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE);
+            authenticationContext.setProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE,
+                    X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE);
             throw new AuthenticationFailedException("Unable to find X509 Certificate in browser");
         }
     }
