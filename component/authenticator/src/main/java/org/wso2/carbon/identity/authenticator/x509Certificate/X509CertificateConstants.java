@@ -43,11 +43,15 @@ public class X509CertificateConstants {
     public static final String USERNAME = "username";
     public static final String SUCCESS = "success";
     public static final String RETRY_PARAM_FOR_CHECKING_CERTIFICATE =
-            "&authFailure=true&errorCode=";
+            "&authFailure=true&errorMsg=";
     public static final String ERROR_PAGE = "x509certificateauthenticationendpoint/x509CertificateError.jsp";
     public static final String CLAIM_URI = "setClaimURI";
     public static final String AUTHENTICATORS = "authenticators";
-    public static final String X509_CERTIFICATE_ERROR_CODE = "X509CertificateErrorCode";
-    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "404";
     public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
+
+    public class ErrorMessage {
+        public static final String X509_CERTIFICATE_ERROR_MESSAGE = "X509CertificateErrorMessage";
+        public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "Could not find X509 Certificate in browser!";
+        public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "Provided Client X509 Certificate is not valid!";
+    }
 }
