@@ -41,6 +41,7 @@ public class X509CertificateConstants {
     public static final String AUTHENTICATION_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
     public static final String AUTHENTICATION_ENDPOINT_PARAMETER = "AuthenticationEndpoint";
     public static final String USERNAME = "username";
+    public static final String ENFORCE_SELF_REGISTRATION = "EnforceSelfRegistration";
     public static final String SUCCESS = "success";
     public static final String RETRY_PARAM_FOR_CHECKING_CERTIFICATE =
             "&authFailure=true&errorCode=";
@@ -48,6 +49,8 @@ public class X509CertificateConstants {
     public static final String CLAIM_URI = "setClaimURI";
     public static final String AUTHENTICATORS = "authenticators";
     public static final String X509_CERTIFICATE_ERROR_CODE = "X509CertificateErrorCode";
-    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "404";
+    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "500";
+    public static final String USERNAME_CONFLICT = "409";
+    public static final String USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE = "404";
     public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
 }
