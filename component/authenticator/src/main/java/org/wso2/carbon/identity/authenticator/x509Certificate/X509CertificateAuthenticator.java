@@ -132,8 +132,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 Map<ClaimMapping, String> claims;
                 claims = getSubjectAttributes(authenticationContext, certAttributes);
                 AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
-                String userName = (String) authenticationContext.getProperty(X509CertificateConstants
-                        .X509_CERTIFICATE_USERNAME);
+                String userName = (String) authenticationContext.getProperty
+                        (X509CertificateConstants.X509_CERTIFICATE_USERNAME);
                 if (!StringUtils.isEmpty(userName)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Getting X509Certificate username");
