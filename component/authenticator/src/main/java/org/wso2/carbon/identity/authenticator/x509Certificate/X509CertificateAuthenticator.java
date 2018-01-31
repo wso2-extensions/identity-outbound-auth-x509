@@ -171,6 +171,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
+     * To add or validate the certificate against to the user name.
+     *
      * @param userName              certificate's username
      * @param authenticationContext the authentication context
      * @param data                  certificate's data
