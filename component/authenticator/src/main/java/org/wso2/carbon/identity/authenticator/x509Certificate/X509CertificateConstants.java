@@ -49,8 +49,9 @@ public class X509CertificateConstants {
     public static final String CLAIM_URI = "setClaimURI";
     public static final String AUTHENTICATORS = "authenticators";
     public static final String X509_CERTIFICATE_ERROR_CODE = "X509CertificateErrorCode";
-    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "500";
-    public static final String USERNAME_CONFLICT = "409";
-    public static final String USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE = "404";
+    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "18013";
+    public static final String USERNAME_CONFLICT = "20015";
+    public static final String USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE = "18003";
     public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
+    public static final String USER_NOT_FOUND = "17001";
 }
