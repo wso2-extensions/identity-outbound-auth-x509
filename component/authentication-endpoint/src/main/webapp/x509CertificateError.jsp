@@ -45,8 +45,14 @@
             if (request.getParameter("errorCode") != null) {
                 errorCode = request.getParameter("errorCode");
 
-                if (errorCode.equalsIgnoreCase("404")) {
+                if (errorCode.equalsIgnoreCase("18013")) {
                     errorMessage = resourceBundle.getString("certificateNotFound.error.message");
+                } else if (errorCode.equalsIgnoreCase("18003")) {
+                    errorMessage = resourceBundle.getString("userNotFound.error.message");
+                } else if (errorCode.equalsIgnoreCase("20015")) {
+                    errorMessage = resourceBundle.getString("userNamesConflict.error.message");
+                } else if (errorCode.equalsIgnoreCase("17001")) {
+                    errorMessage = resourceBundle.getString("userNotFoundInUserStore.error.message");
                 }
             }
         }
