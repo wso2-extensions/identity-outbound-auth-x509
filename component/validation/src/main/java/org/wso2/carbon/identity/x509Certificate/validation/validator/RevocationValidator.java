@@ -28,7 +28,7 @@ import java.security.cert.X509Certificate;
  */
 public interface RevocationValidator {
 
-    public RevocationStatus checkRevocationStatus(X509Certificate peerCert, X509Certificate issuerCert)
+    public RevocationStatus checkRevocationStatus(X509Certificate peerCert, X509Certificate issuerCert, int retryCount)
             throws CertificateValidationException;
 
     public boolean isEnable();
@@ -38,4 +38,12 @@ public interface RevocationValidator {
     public int getPriority();
 
     public void setPriority(int priority);
+
+    public boolean isFullChainValidationEnable();
+
+    public void setFullChainValidation(boolean fullChainValidationEnabled);
+
+    public int getRetryCount();
+
+    public void setRetryCount(int retryCount);
 }

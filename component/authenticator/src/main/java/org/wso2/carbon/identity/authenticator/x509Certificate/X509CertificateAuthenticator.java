@@ -32,6 +32,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -70,8 +71,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 String redirectUrl = errorPageUrl + ("?" + FrameworkConstants.SESSION_DATA_KEY + "="
                         + authenticationContext.getContextIdentifier()) + "&" + X509CertificateConstants.AUTHENTICATORS
                         + "=" + getName() + X509CertificateConstants.RETRY_PARAM_FOR_CHECKING_CERTIFICATE
-                        + authenticationContext.getProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE);
-                authenticationContext.setProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE, "");
+                        + authenticationContext.getProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE);
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE, "");
 
                 if (log.isDebugEnabled()) {
                     log.debug("Redirect to error page: " + redirectUrl);
@@ -132,40 +133,95 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 Map<ClaimMapping, String> claims;
                 claims = getSubjectAttributes(authenticationContext, certAttributes);
                 AuthenticatedUser authenticatedUser = getUsername(authenticationContext);
-                String userName;
-                if (authenticatedUser != null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Authenticated username is: " + authenticatedUser);
-                    }
-                    userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
-                } else {
+                String userName = (String) authenticationContext.getProperty
+                        (X509CertificateConstants.X509_CERTIFICATE_USERNAME);
+                if (!StringUtils.isEmpty(userName)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Getting X509Certificate username");
                     }
-                    userName = (String) authenticationContext.getProperty(X509CertificateConstants
-                            .X509_CERTIFICATE_USERNAME);
-                }
-                if (StringUtils.isEmpty(userName)) {
-                    throw new AuthenticationFailedException("username can't be empty");
-                }
-
-                if (X509CertificateUtil.validateCerts(userName, data)) {
-                    allowUser(userName, claims, cert, authenticationContext);
-                    if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate is allowed to user: " + userName);
+                    if (authenticatedUser != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Authenticated username is: " + authenticatedUser);
+                        }
+                        String authenticatedUserName = authenticatedUser.getAuthenticatedSubjectIdentifier();
+                        if (authenticatedUserName.equals(userName)) {
+                            addOrValidateCertificate(userName, authenticationContext, data, claims, cert);
+                        } else {
+                            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                                    X509CertificateConstants.USERNAME_CONFLICT);
+                            throw new AuthenticationFailedException("Couldn't find X509 certificate to " +
+                                    "this authenticated user: " + authenticatedUserName);
+                        }
+                    } else {
+                        addOrValidateCertificate(userName, authenticationContext, data, claims, cert);
                     }
                 } else {
-                    authenticationContext.setProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE,
-                            X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_NOT_VALID_ERROR_CODE);
-                    throw new AuthenticationFailedException("X509Certificate is not valid");
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                            X509CertificateConstants.USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE);
+                    throw new AuthenticationFailedException("Couldn't find the username for X509Certificate's " +
+                            "attribute");
                 }
             } else {
                 throw new AuthenticationFailedException("X509Certificate object is null");
             }
         } else {
-            authenticationContext.setProperty(X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_ERROR_MESSAGE,
-                    X509CertificateConstants.ErrorMessage.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE);
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE);
             throw new AuthenticationFailedException("Unable to find X509 Certificate in browser");
+        }
+    }
+
+    /**
+     * To add or validate the certificate against to the user name.
+     *
+     * @param userName              certificate's username
+     * @param authenticationContext the authentication context
+     * @param data                  certificate's data
+     * @param claims                claims of the user
+     * @param cert                  X509 certificate
+     * @throws AuthenticationFailedException
+     */
+    private void addOrValidateCertificate(String userName, AuthenticationContext authenticationContext, byte[] data,
+                                          Map<ClaimMapping, String> claims, X509Certificate cert) throws
+            AuthenticationFailedException {
+
+        boolean isClientCertValid;
+        boolean isSelfRegistrationEnable = Boolean.parseBoolean(getAuthenticatorConfig().getParameterMap().
+                get(X509CertificateConstants.ENFORCE_SELF_REGISTRATION));
+        try {
+            isClientCertValid = X509CertificateUtil.validateCerts(userName, data, isSelfRegistrationEnable);
+        } catch (AuthenticationFailedException e) {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE);
+            throw e;
+        }
+
+
+        if(isClientCertValid) {
+            if (isSelfRegistrationEnable) {
+                allowUser(userName, claims, cert, authenticationContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("X509Certificate is allowed to user: " + userName);
+                }
+            } else {
+                try {
+                    boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
+                            (userName);
+                    if (isUserExist) {
+                        allowUser(userName, claims, cert, authenticationContext);
+                    } else {
+                        authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                                X509CertificateConstants.USER_NOT_FOUND);
+                        throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
+                    }
+                } catch (UserStoreException e) {
+                    throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
+                }
+            }
+        } else {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_VALID_ERROR_CODE);
+            throw new AuthenticationFailedException("X509Certificate is not valid");
         }
     }
 

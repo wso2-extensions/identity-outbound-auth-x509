@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationUtil;
+import org.wso2.carbon.identity.x509Certificate.validation.validator.OCSPValidator;
 import org.wso2.carbon.identity.x509Certificate.validation.validator.RevocationValidator;
 import org.wso2.carbon.identity.x509Certificate.validation.validator.CRLValidator;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManager;
@@ -45,9 +46,11 @@ public class X509CertificateValidationServiceComponent {
     protected void activate(ComponentContext context) {
         context.getBundleContext().registerService(RevocationValidationManager.class.getName(),
                 new RevocationValidationManagerImpl(), null);
-        CertificateValidationUtil.addDefaultValidatorConfig(null);
+        CertificateValidationUtil.addDefaultValidationConfigInRegistry(null);
         context.getBundleContext().registerService(RevocationValidator.class.getName(),
                 new CRLValidator(), null);
+        context.getBundleContext().registerService(RevocationValidator.class.getName(),
+                new OCSPValidator(), null);
         context.getBundleContext().registerService(TenantMgtListener.class.getName(),
                 new TenantManagementListener(), null);
     }

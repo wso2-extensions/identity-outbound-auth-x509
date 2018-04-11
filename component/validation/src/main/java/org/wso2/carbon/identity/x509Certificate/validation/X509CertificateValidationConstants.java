@@ -26,11 +26,27 @@ public class X509CertificateValidationConstants {
     private X509CertificateValidationConstants() {
     }
 
-    public static final String VALIDATOR_CONF_DIRECTORY = "security";
-    public static final String VALIDATOR_CONF_FILE = "certificate-validators.xml";
+    public static final String CERT_VALIDATION_CONF_DIRECTORY = "security";
+    public static final String CERT_VALIDATION_CONF_FILE = "certificate-validation.xml";
+
+    public static final String VALIDATOR_CONF = "Validators";
     public static final String VALIDATOR_CONF_NAME = "name";
     public static final String VALIDATOR_CONF_DISPLAY_NAME = "displayName";
     public static final String VALIDATOR_CONF_ENABLE = "enable";
     public static final String VALIDATOR_CONF_PRIORITY = "priority";
+    public static final String VALIDATOR_CONF_ELEMENT_PARAMETER = "Parameter";
+    public static final String VALIDATOR_CONF_ELEMENT_PROPERTY_NAME = "name";
+    public static final String VALIDATOR_CONF_FULL_CHAIN_VALIDATION = "fullChainValidation";
+    public static final String VALIDATOR_CONF_RETRY_COUNT = "retryCount";
     public static final String VALIDATOR_CONF_REG_PATH = "repository/security/certificate/validator";
+
+    public static final String TRUSTSTORE_CONF = "TrustStores";
+    public static final String TRUSTSTORE_CONF_FILE = "truststoreFile";
+    public static final String TRUSTSTORE_CONF_PASSWORD = "truststorePass";
+    public static final String TRUSTSTORE_CONF_TYPE = "type";
+    public static final String TRUSTSTORE_CONF_TYPE_DEFAULT = "JKS";
+    public static final String CA_CERT_REG_PATH = "repository/security/certificate/certificate-authority";
+    public static final String CA_CERT_REG_CRL = "crl";
+    public static final String CA_CERT_REG_OCSP = "ocsp";
+    public static final String CA_CERT_REG_CRL_OCSP_SEPERATOR = ",";
 }

@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.identity.x509Certificate.validation.cache;
 
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.application.common.cache.BaseCache;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
 /**
@@ -44,5 +46,17 @@ public class CRLCache extends BaseCache<String, CRLCacheEntry> {
             }
         }
         return instance;
+    }
+
+    public void addToCache(String key, CRLCacheEntry crlCacheEntry) {
+        super.addToCache(key, crlCacheEntry);
+    }
+
+    public CRLCacheEntry getValueFromCache(String key) {
+        return super.getValueFromCache(key);
+    }
+
+    public void clearCacheEntry(String key) {
+        super.clearCacheEntry(key);
     }
 }

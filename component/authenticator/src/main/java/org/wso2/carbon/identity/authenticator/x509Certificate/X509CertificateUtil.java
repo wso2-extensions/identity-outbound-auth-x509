@@ -168,7 +168,7 @@ public class X509CertificateUtil {
      * @return boolean status of the action
      * @throws AuthenticationFailedException
      */
-    public static boolean validateCerts(String userName, byte[] certificateBytes)
+    public static boolean validateCerts(String userName, byte[] certificateBytes, boolean isSelfRegistrationEnable)
             throws AuthenticationFailedException {
         X509Certificate x509Certificate;
         try {
@@ -179,33 +179,41 @@ public class X509CertificateUtil {
             boolean isRevoked = revocationValidationManager.verifyRevocationStatus(x509Certificate);
 
             if (isRevoked) {
-                if (X509CertificateUtil.isCertificateExist(userName) &&
-                        x509Certificate.equals(getCertificate(userName))) {
-                    X509CertificateUtil.deleteCertificate(userName);
+                if (isSelfRegistrationEnable) {
+                    if (X509CertificateUtil.isCertificateExist(userName) &&
+                            x509Certificate.equals(getCertificate(userName))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Provided X509 client certificate has been revoked. Removing the x509Certificate claim " +
+                                    "of the user.");
+                        }
+                        X509CertificateUtil.deleteCertificate(userName);
+                    }
                 }
                 return false;
             } else {
-                if (!X509CertificateUtil.isCertificateExist(userName)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate does not exit for user: " + userName);
-                    }
-                    X509CertificateUtil.addCertificate(userName, certificateBytes);
-                    if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate is added to user: " + userName);
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("X509Certificate exits and getting validated");
-                    }
-                    if (!x509Certificate.equals(getCertificate(userName))) {
-                        return false;
+                if (isSelfRegistrationEnable) {
+                    if (!X509CertificateUtil.isCertificateExist(userName)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("X509Certificate does not exit for user: " + userName);
+                        }
+                        X509CertificateUtil.addCertificate(userName, certificateBytes);
+                        if (log.isDebugEnabled()) {
+                            log.debug("X509Certificate is added to user: " + userName);
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("X509Certificate exits and getting validated");
+                        }
+                        if (!x509Certificate.equals(getCertificate(userName))) {
+                            return false;
+                        }
                     }
                 }
             }
         } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while retrieving certificate ", e);
         } catch (CertificateValidationException e) {
-            throw new AuthenticationFailedException("Error while validating certificate ", e);
+            throw new AuthenticationFailedException("Error while validating client certificate ", e);
         }
         return true;
     }

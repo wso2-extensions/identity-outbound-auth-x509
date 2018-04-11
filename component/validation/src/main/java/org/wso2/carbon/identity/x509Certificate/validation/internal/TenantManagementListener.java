@@ -20,10 +20,15 @@ package org.wso2.carbon.identity.x509Certificate.validation.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationUtil;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class TenantManagementListener implements TenantMgtListener {
 
@@ -31,8 +36,6 @@ public class TenantManagementListener implements TenantMgtListener {
     private static Log log = LogFactory.getLog(TenantManagementListener.class);
 
     public void onTenantCreate(TenantInfoBean tenantInfo) throws StratosException {
-        String tenantDomain = tenantInfo.getTenantDomain();
-        CertificateValidationUtil.addDefaultValidatorConfig(tenantDomain);
     }
 
     public void onTenantUpdate(TenantInfoBean tenantInfo) throws StratosException {
@@ -55,6 +58,14 @@ public class TenantManagementListener implements TenantMgtListener {
     }
 
     public void onTenantInitialActivation(int tenantId) throws StratosException {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext
+                .getThreadLocalCarbonContext();
+        String tenantDomain = IdentityTenantUtil.getTenantDomain(tenantId);
+        carbonContext.setTenantId(tenantId);
+        carbonContext.setTenantDomain(tenantDomain);
+        CertificateValidationUtil.addDefaultValidationConfigInRegistry(tenantDomain);
+        PrivilegedCarbonContext.endTenantFlow();
     }
 
     public void onTenantActivation(int tenantId) throws StratosException {

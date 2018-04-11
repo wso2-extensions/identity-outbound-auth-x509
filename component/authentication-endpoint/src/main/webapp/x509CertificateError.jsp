@@ -42,8 +42,22 @@
         if (Boolean.parseBoolean(request.getParameter("authFailure"))) {
             authenticationFailed = "true";
 
-            if (request.getParameter("errorMsg") != null) {
-                errorMessage = request.getParameter("errorMsg");
+            if (request.getParameter("errorCode") != null) {
+                errorCode = request.getParameter("errorCode");
+
+                if (errorCode.equalsIgnoreCase("18013")) {
+                    errorMessage = resourceBundle.getString("certificateNotFound.error.message");
+                } else if (errorCode.equalsIgnoreCase("18003")) {
+                    errorMessage = resourceBundle.getString("userNotFound.error.message");
+                } else if (errorCode.equalsIgnoreCase("20015")) {
+                    errorMessage = resourceBundle.getString("userNamesConflict.error.message");
+                } else if (errorCode.equalsIgnoreCase("17001")) {
+                    errorMessage = resourceBundle.getString("userNotFoundInUserStore.error.message");
+                } else if (errorCode.equalsIgnoreCase("18015")) {
+                    errorMessage = resourceBundle.getString("not.valid.certificate");
+                } else if (errorCode.equalsIgnoreCase("17003")) {
+                    errorMessage = resourceBundle.getString("fail.validation.certificate");
+                }
             }
         }
     %>

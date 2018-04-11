@@ -41,17 +41,26 @@ public class X509CertificateConstants {
     public static final String AUTHENTICATION_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
     public static final String AUTHENTICATION_ENDPOINT_PARAMETER = "AuthenticationEndpoint";
     public static final String USERNAME = "username";
+    public static final String ENFORCE_SELF_REGISTRATION = "EnforceSelfRegistration";
     public static final String SUCCESS = "success";
     public static final String RETRY_PARAM_FOR_CHECKING_CERTIFICATE =
-            "&authFailure=true&errorMsg=";
+            "&authFailure=true&errorCode=";
     public static final String ERROR_PAGE = "x509certificateauthenticationendpoint/x509CertificateError.jsp";
     public static final String CLAIM_URI = "setClaimURI";
     public static final String AUTHENTICATORS = "authenticators";
+    public static final String X509_CERTIFICATE_ERROR_CODE = "X509CertificateErrorCode";
+    public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "18013";
+    public static final String USERNAME_CONFLICT = "20015";
+    public static final String USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE = "18003";
     public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
+    public static final String USER_NOT_FOUND = "17001";
+    public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "18015";
+    public static final String X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE = "17003";
 
     public class ErrorMessage {
         public static final String X509_CERTIFICATE_ERROR_MESSAGE = "X509CertificateErrorMessage";
         public static final String X509_CERTIFICATE_NOT_FOUND_ERROR_CODE = "Could not find X509 Certificate in browser!";
         public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "Provided Client X509 Certificate is not valid!";
+        public static final String X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE = "Could not validate the provided client certificate!";
     }
 }

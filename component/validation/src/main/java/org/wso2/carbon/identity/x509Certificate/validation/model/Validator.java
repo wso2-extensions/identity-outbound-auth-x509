@@ -24,6 +24,8 @@ public class Validator {
     private String displayName;
     private boolean enabled;
     private int priority;
+    private boolean fullChainValidationEnabled;
+    private int retryCount;
 
     public String getName() {
         return name;
@@ -55,5 +57,21 @@ public class Validator {
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    public void setFullChainValidationEnabled(boolean fullChainValidationEnabled) {
+        this.fullChainValidationEnabled = fullChainValidationEnabled;
+    }
+
+    public boolean getFullChainValidationEnabled() {
+        return fullChainValidationEnabled;
     }
 }
