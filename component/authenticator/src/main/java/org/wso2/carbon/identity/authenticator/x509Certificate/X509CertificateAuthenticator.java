@@ -32,7 +32,6 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -184,40 +183,26 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private void addOrValidateCertificate(String userName, AuthenticationContext authenticationContext, byte[] data,
                                           Map<ClaimMapping, String> claims, X509Certificate cert) throws
             AuthenticationFailedException {
+
+        boolean isUserCertValid;
         boolean isSelfRegistrationEnable = Boolean.parseBoolean(getAuthenticatorConfig().getParameterMap().
                 get(X509CertificateConstants.ENFORCE_SELF_REGISTRATION));
-        if (isSelfRegistrationEnable) {
-            if (!X509CertificateUtil.isCertificateExist(userName)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("X509Certificate does not exit for user: " + userName);
-                }
-                X509CertificateUtil.addCertificate(userName, data);
-                allowUser(userName, claims, cert, authenticationContext);
-                if (log.isDebugEnabled()) {
-                    log.debug("X509Certificate added and allowed to user: " + userName);
-                }
-            } else if (X509CertificateUtil.validateCerts(userName, data)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("X509Certificate exits and getting validated");
-                }
-                allowUser(userName, claims, cert, authenticationContext);
-            } else {
-                throw new AuthenticationFailedException("X509Certificate is not valid");
-            }
+        try {
+            isUserCertValid = X509CertificateUtil.validateCerts(userName, authenticationContext, data,
+                    isSelfRegistrationEnable);
+        } catch (AuthenticationFailedException e) {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE);
+            throw new AuthenticationFailedException("Error in validating the user certificate");
+        }
+
+
+        if(isUserCertValid) {
+            allowUser(userName, claims, cert, authenticationContext);
         } else {
-            try {
-                boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
-                        (userName);
-                if (isUserExist) {
-                    allowUser(userName, claims, cert, authenticationContext);
-                } else {
-                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                            X509CertificateConstants.USER_NOT_FOUND);
-                    throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
-                }
-            } catch (UserStoreException e) {
-                throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
-            }
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_VALID_ERROR_CODE);
+            throw new AuthenticationFailedException("X509Certificate is not valid");
         }
     }
 

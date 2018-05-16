@@ -53,6 +53,10 @@
                     errorMessage = resourceBundle.getString("userNamesConflict.error.message");
                 } else if (errorCode.equalsIgnoreCase("17001")) {
                     errorMessage = resourceBundle.getString("userNotFoundInUserStore.error.message");
+                } else if (errorCode.equalsIgnoreCase("18015")) {
+                    errorMessage = resourceBundle.getString("not.valid.certificate");
+                } else if (errorCode.equalsIgnoreCase("17003")) {
+                    errorMessage = resourceBundle.getString("fail.validation.certificate");
                 }
             }
         }
