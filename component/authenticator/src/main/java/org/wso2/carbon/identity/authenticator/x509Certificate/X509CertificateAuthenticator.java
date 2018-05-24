@@ -188,16 +188,15 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         boolean isSelfRegistrationEnable = Boolean.parseBoolean(getAuthenticatorConfig().getParameterMap().
                 get(X509CertificateConstants.ENFORCE_SELF_REGISTRATION));
         try {
-            isUserCertValid = X509CertificateUtil.validateCerts(userName, authenticationContext, data,
+            isUserCertValid = X509CertificateUtil.validateCertificate(userName, authenticationContext, data,
                     isSelfRegistrationEnable);
         } catch (AuthenticationFailedException e) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE);
-            throw new AuthenticationFailedException("Error in validating the user certificate");
+            throw new AuthenticationFailedException("Error in validating the user certificate", e);
         }
 
-
-        if(isUserCertValid) {
+        if (isUserCertValid) {
             allowUser(userName, claims, cert, authenticationContext);
         } else {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
