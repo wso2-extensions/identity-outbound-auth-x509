@@ -20,21 +20,27 @@
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.apache.axiom.om.util.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationException;
+import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManager;
+import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManagerImpl;
 import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.apache.commons.lang.StringUtils;
 
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +72,9 @@ public class X509CertificateUtil {
                     log.debug("The user certificate is " + userCertificate);
                 }
                 if (StringUtils.isNotEmpty(userCertificate)) {
-                    x509Certificate = X509Certificate.getInstance(Base64.decode(userCertificate));
+                    CertificateFactory cf = CertificateFactory.getInstance("X509");
+                    x509Certificate = (X509Certificate) cf.generateCertificate
+                            (new ByteArrayInputStream(Base64.decode(userCertificate)));
                 } else {
                     return null;
                 }
@@ -77,10 +85,10 @@ public class X509CertificateUtil {
                 throw new AuthenticationFailedException("Cannot find the user realm for the given tenant domain : " +
                         CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             }
-        } catch (javax.security.cert.CertificateException e) {
+        } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while decoding the certificate ", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new AuthenticationFailedException("Error while user manager for tenant id ", e);
+        } catch (UserStoreException e) {
+            throw new AuthenticationFailedException("Error while retrieving the user store manager ", e);
         }
         return x509Certificate;
     }
@@ -88,18 +96,17 @@ public class X509CertificateUtil {
     /**
      * Add certificate into claims.
      *
-     * @param username         name of the user
-     * @param certificateBytes x509 certificate
+     * @param username        name of the user
+     * @param x509Certificate x509 certificate
      * @return boolean status of the action
      * @throws AuthenticationFailedException authentication failed exception
      */
-    public static boolean addCertificate(String username, byte[] certificateBytes)
+    public static boolean addCertificate(String username, X509Certificate x509Certificate)
             throws AuthenticationFailedException {
         Map<String, String> claims = new HashMap<>();
         UserRealm userRealm = getUserRealm(username);
         try {
             if (userRealm != null) {
-                X509Certificate x509Certificate = X509Certificate.getInstance(certificateBytes);
                 claims.put(getClaimUri(), Base64.encode(x509Certificate.getEncoded()));
                 String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
                 userRealm.getUserStoreManager().setUserClaimValues(tenantAwareUsername, claims,
@@ -114,9 +121,7 @@ public class X509CertificateUtil {
         } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while retrieving certificate of user: " + username, e);
         } catch (UserStoreException e) {
-            throw new AuthenticationFailedException("Error while setting certificate of user: " + username, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new AuthenticationFailedException("Error while user manager for tenant id", e);
+            throw new AuthenticationFailedException("Error while retrieving the user store manager ", e);
         }
         if (log.isDebugEnabled()) {
             log.debug("X509 certificate is added for user: " + username);
@@ -125,27 +130,48 @@ public class X509CertificateUtil {
     }
 
     /**
-     * Validate the certificate against with given certificate.
+     * Validate the user certificate
      *
      * @param userName         name of the user
      * @param certificateBytes x509 certificate
      * @return boolean status of the action
      * @throws AuthenticationFailedException
      */
-    public static boolean validateCerts(String userName, byte[] certificateBytes)
+    public static boolean validateCertificate(String userName, AuthenticationContext authenticationContext,
+                                              byte[] certificateBytes, boolean isSelfRegistrationEnable)
             throws AuthenticationFailedException {
         X509Certificate x509Certificate;
-        boolean validateResult;
         try {
-            x509Certificate = X509Certificate.getInstance(certificateBytes);
-            validateResult = x509Certificate.equals(getCertificate(userName));
-        } catch (javax.security.cert.CertificateException e) {
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
+            x509Certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBytes));
+
+            if (isSelfRegistrationEnable && isCertificateExist(userName) && !isUserCertificateValid(userName,
+                    x509Certificate)) {
+                return false;
+            } else if (!isSelfRegistrationEnable && !isUserExists(userName, authenticationContext)) {
+                return false;
+            }
+
+            if (isCertificateRevoked(x509Certificate)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("X509 certificate with serial num: " + x509Certificate.getSerialNumber() +
+                            " is revoked");
+                }
+                if (isSelfRegistrationEnable) {
+                    deleteUserCertificate(userName, x509Certificate);
+                }
+                return false;
+            } else if (isSelfRegistrationEnable && !isCertificateExist(userName)) {
+                addUserCertificate(userName, x509Certificate);
+            }
+        } catch (CertificateException e) {
             throw new AuthenticationFailedException("Error while retrieving certificate ", e);
+        } catch (CertificateValidationException e) {
+            throw new AuthenticationFailedException("Error while validating client certificate with serial num: ", e);
+        } catch (UserStoreException e) {
+            throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("X509 certificate validation is completed and the result is " + validateResult);
-        }
-        return validateResult;
+        return true;
     }
 
     /**
@@ -212,9 +238,103 @@ public class X509CertificateUtil {
                 RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();
                 userRealm = realmService.getTenantUserRealm(tenantId);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             throw new AuthenticationFailedException("Cannot find the user realm for the username: " + username, e);
         }
         return userRealm;
     }
+
+    /**
+     * Check the revocation status of the certificate
+     *
+     * @param x509Certificate x509 certificate
+     * @return true if the certificate is revoked
+     * @throws CertificateValidationException
+     */
+    private static boolean isCertificateRevoked(X509Certificate x509Certificate) throws CertificateValidationException {
+
+        RevocationValidationManager revocationValidationManager = new RevocationValidationManagerImpl();
+        return revocationValidationManager.verifyRevocationStatus(x509Certificate);
+    }
+
+    private static void deleteUserCertificate(String userName, X509Certificate x509Certificate)
+            throws AuthenticationFailedException {
+
+        if (isCertificateExist(userName) && isUserCertificateValid(userName, x509Certificate)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Provided X509 client certificate with serial num: " + x509Certificate.getSerialNumber() +
+                        " has been revoked. Removing the x509Certificate claim of the user: " + userName);
+            }
+            deleteCertificate(userName);
+        }
+    }
+
+    private static void deleteCertificate(String username) throws AuthenticationFailedException {
+
+        String[] claims = new String[1];
+        UserRealm userRealm = getUserRealm(username);
+        try {
+            if (userRealm != null) {
+                claims[0] = getClaimUri();
+                String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+                userRealm.getUserStoreManager().deleteUserClaimValues(tenantAwareUsername, claims,
+                        X509CertificateConstants.DEFAULT);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("UserRealm is null for username: " + username);
+                }
+                throw new AuthenticationFailedException("Cannot find the user realm for the given tenant domain : " +
+                        CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            }
+        } catch (UserStoreException e) {
+            throw new AuthenticationFailedException("Error while deleting certificate of user: " + username, e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("X509 certificate is deleted for user: " + username);
+        }
+    }
+
+    private static void addUserCertificate(String userName, X509Certificate x509Certificate)
+            throws AuthenticationFailedException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("X509 Certificate with serial num: " + x509Certificate.getSerialNumber() +
+                    " does not exit for user: " + userName);
+        }
+        X509CertificateUtil.addCertificate(userName, x509Certificate);
+        if (log.isDebugEnabled()) {
+            log.debug("Adding the X509 certificate with serial num: " + x509Certificate.getSerialNumber() +
+                    " as a user claim.");
+        }
+    }
+
+    private static boolean isUserCertificateValid(String userName, X509Certificate x509Certificate)
+            throws AuthenticationFailedException {
+
+        X509Certificate certInUserClaim = getCertificate(userName);
+        if (log.isDebugEnabled()) {
+            log.debug("X509 certificate with serial num: " + x509Certificate.getSerialNumber() +
+                    " is getting matched with the user certificate with serial num : " +
+                    certInUserClaim.getSerialNumber() + " in the user claim of user: " + userName);
+        }
+        return x509Certificate.equals(certInUserClaim);
+    }
+
+    private static boolean isUserExists(String userName, AuthenticationContext authenticationContext)
+            throws UserStoreException, AuthenticationFailedException {
+
+        boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
+                (userName);
+        if (isUserExist) {
+            if (log.isDebugEnabled()) {
+                log.debug("User exists with the user name: " + userName);
+            }
+            return true;
+        } else {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.USER_NOT_FOUND);
+            throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
+        }
+    }
+
 }

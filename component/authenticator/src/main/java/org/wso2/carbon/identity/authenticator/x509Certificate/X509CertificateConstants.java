@@ -54,4 +54,7 @@ public class X509CertificateConstants {
     public static final String USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE = "18003";
     public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
     public static final String USER_NOT_FOUND = "17001";
+    public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "18015";
+    public static final String X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE = "17003";
+
 }
