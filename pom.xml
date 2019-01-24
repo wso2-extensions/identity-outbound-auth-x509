@@ -38,6 +38,7 @@
             <modules>
                 <module>component/authentication-endpoint</module>
                 <module>component/authenticator</module>
+                <module>component/valves</module>
                 <module>feature</module>
             </modules>
         </profile>
