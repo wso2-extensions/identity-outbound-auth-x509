@@ -45,30 +45,31 @@ public class X509CertificateAuthenticationValve extends ValveBase {
 
     private static final String X509_REQUEST_HEADER = "X-SSL-CERT";
     private static final String X509CERT_NAME = "X509";
-    private static final String CERT_PEM_START = "[-]+BEGIN CERTIFICATE[-]+[\t]*[\n]*";
-    private static final Pattern PATTERN = Pattern.compile("[-]+(BEGIN CERTIFICATE)[-]+[\t]*[\n]*([^-]+)[-]+(END CERTIFICATE)[-]+");
-    private static final String CERT_PEM_END = "[-]+END CERTIFICATE[-]+";
+    private static final String CERT_PEM_START = "[-]+(BEGIN CERTIFICATE)[-]+[\t]*[\n]*";
+    private static final String CERT_PEM_END = "[-]+(END CERTIFICATE)[-]+";
+    private static final Pattern PATTERN = Pattern.compile(CERT_PEM_START + "([^-]+)" + CERT_PEM_END);
 
     private static Log log = LogFactory.getLog(X509CertificateAuthenticationValve.class);
 
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
-            extractAndSetX509certificate(request);
-            getNext().invoke(request, response);
+
+        extractAndSetX509certificate(request);
+        getNext().invoke(request, response);
     }
 
     /**
      * Sets X509Certificate[] as an attribute in the request.
+     *
      * @param request
      */
     private void extractAndSetX509certificate(Request request) {
 
         X509Certificate certificate = getCertificate(request);
-        
         if (certificate != null) {
             X509Certificate[] certificates = new X509Certificate[]{certificate};
             request.setAttribute(X509CertificateConstants.X_509_CERTIFICATE, certificates);
-            
+
             if (log.isDebugEnabled()) {
                 log.debug("X509certificate is set as an attribute in the request");
             }
@@ -77,19 +78,18 @@ public class X509CertificateAuthenticationValve extends ValveBase {
 
     /**
      * Returns the X509Certificate extracted from the request header.
+     *
      * @param request
      * @return X509Certificate
      */
     private X509Certificate getCertificate(Request request) {
 
         X509Certificate certificate = null;
-
         String pemCert = request.getHeader(X509_REQUEST_HEADER);
         if (StringUtils.isNotEmpty(pemCert)) {
             Matcher matcher = PATTERN.matcher(pemCert);
             if (matcher.matches()) {
-                String pemCertBody = pemCert.replaceAll(CERT_PEM_START, "")
-                        .replaceAll(CERT_PEM_END, ""); // Need for the pem format
+                String pemCertBody = pemCert.replaceAll(CERT_PEM_START, "").replaceAll(CERT_PEM_END, "");
                 byte[] certificateData = Base64.getMimeDecoder().decode(pemCertBody);
 
                 try {
