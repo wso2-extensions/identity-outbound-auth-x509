@@ -192,6 +192,12 @@
             <artifactId>org.wso2.carbon.extension.identity.x509Certificate.validation</artifactId>
             <version>${identity.x509Certificate.validation.version}</version>
         </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.extension.identity.authenticator</groupId>
+                <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector</artifactId>
+                <version>${authenticator.x509Certificate.connector}</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <scm>
@@ -395,5 +401,6 @@
         <maven.compiler.war.version>2.2</maven.compiler.war.version>
         <org.apache.oltu.oauth2.client>0.31</org.apache.oltu.oauth2.client>
         <org.apache.oltu.oauth2.common>1.0.1</org.apache.oltu.oauth2.common>
+        <authenticator.x509Certificate.connector>2.0.8</authenticator.x509Certificate.connector>
     </properties>
 </project>
