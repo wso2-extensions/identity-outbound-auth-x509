@@ -22,6 +22,7 @@ package org.wso2.carbon.identity.authenticator.x509cert.valve;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateConstants;
@@ -45,14 +46,14 @@ public class X509CertificateAuthenticationValve extends ValveBase {
     private static final String X509_REQUEST_HEADER = "X-SSL-CERT";
     private static final String X509CERT_NAME = "X509";
     private static final String CERT_PEM_START = "[-]+BEGIN CERTIFICATE[-]+[\t]*[\n]*";
-    private static final String reg = "[-]+(BEGIN CERTIFICATE)[-]+[\t]*[\n]*([^-]+)[-]+(END CERTIFICATE)[-]+";
+    private static final Pattern PATTERN = Pattern.compile("[-]+(BEGIN CERTIFICATE)[-]+[\t]*[\n]*([^-]+)[-]+(END CERTIFICATE)[-]+");
     private static final String CERT_PEM_END = "[-]+END CERTIFICATE[-]+";
 
     private static Log log = LogFactory.getLog(X509CertificateAuthenticationValve.class);
 
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
-            setX509certificate(request);
+            extractAndSetX509certificate(request);
             getNext().invoke(request, response);
     }
 
@@ -60,13 +61,17 @@ public class X509CertificateAuthenticationValve extends ValveBase {
      * Sets X509Certificate[] as an attribute in the request.
      * @param request
      */
-    private void setX509certificate(Request request){
+    private void extractAndSetX509certificate(Request request) {
 
         X509Certificate certificate = getCertificate(request);
-        X509Certificate[] certificates = new X509Certificate[]{certificate};
-        request.setAttribute(X509CertificateConstants.X_509_CERTIFICATE, certificates);
-        if(log.isDebugEnabled()){
-            log.debug("X509certificate is set as an attribute in the request");
+        
+        if (certificate != null) {
+            X509Certificate[] certificates = new X509Certificate[]{certificate};
+            request.setAttribute(X509CertificateConstants.X_509_CERTIFICATE, certificates);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("X509certificate is set as an attribute in the request");
+            }
         }
     }
 
@@ -77,18 +82,18 @@ public class X509CertificateAuthenticationValve extends ValveBase {
      */
     private X509Certificate getCertificate(Request request) {
 
-        String ssl_cert = request.getHeader(X509_REQUEST_HEADER);
         X509Certificate certificate = null;
-        if (ssl_cert != null && ! ssl_cert.trim().isEmpty()) {
-            Pattern pattern = Pattern.compile(reg);
-            Matcher matcher = pattern.matcher(ssl_cert);
-            if (matcher.matches()){
-                String replaced_ssl_cert = ssl_cert.replaceAll(CERT_PEM_START, "")
+
+        String pemCert = request.getHeader(X509_REQUEST_HEADER);
+        if (StringUtils.isNotEmpty(pemCert)) {
+            Matcher matcher = PATTERN.matcher(pemCert);
+            if (matcher.matches()) {
+                String pemCertBody = pemCert.replaceAll(CERT_PEM_START, "")
                         .replaceAll(CERT_PEM_END, ""); // Need for the pem format
-                byte[] certificateData = Base64.getMimeDecoder().decode(replaced_ssl_cert);
-                CertificateFactory cf = null;
+                byte[] certificateData = Base64.getMimeDecoder().decode(pemCertBody);
+
                 try {
-                    cf = CertificateFactory.getInstance(X509CERT_NAME);
+                    CertificateFactory cf = CertificateFactory.getInstance(X509CERT_NAME);
                     certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateData));
                 } catch (CertificateException e) {
                     log.error("Error occurred in generating certificate: " + request.getRequestURI(), e);
