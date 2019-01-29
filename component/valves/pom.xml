@@ -87,11 +87,8 @@
                         org.wso2.carbon.identity.authenticator.x509cert.valve.*,
                     </Export-Package>
                         <Import-Package>
-                            javax.servlet; version=2.4.0,
-                            javax.servlet.http; version=2.4.0,
-                            org.apache.tomcat.*
-                            org.wso2.carbon.base.*,
-                            org.wso2.carbon.user.core.*,
+                            javax.servlet; version="${imp.pkg.version.javax.servlet}",
+                            org.apache.tomcat.*; version="${imp.pkg.version.apache.tomcat}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
@@ -108,6 +105,12 @@
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
+            <inherited>true</inherited>
+            <configuration>
+                <encoding>UTF-8</encoding>
+                <source>1.8</source>
+                <target>1.8</target>
+            </configuration>
         </plugin>
     </plugins>
     </build>

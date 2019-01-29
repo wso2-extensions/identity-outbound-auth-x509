@@ -402,5 +402,7 @@
         <org.apache.oltu.oauth2.client>0.31</org.apache.oltu.oauth2.client>
         <org.apache.oltu.oauth2.common>1.0.1</org.apache.oltu.oauth2.common>
         <authenticator.x509Certificate.connector>2.0.8</authenticator.x509Certificate.connector>
+        <imp.pkg.version.javax.servlet>2.4.0</imp.pkg.version.javax.servlet>
+        <imp.pkg.version.apache.tomcat>[7.0.0, 9.0.0)</imp.pkg.version.apache.tomcat>
     </properties>
 </project>
