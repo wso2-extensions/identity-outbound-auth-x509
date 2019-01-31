@@ -26,16 +26,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateConstants;
+import org.wso2.carbon.identity.authenticator.x509cert.valve.config.X509ServerConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import javax.servlet.ServletException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.ServletException;
 
 /**
  * Valve for extracting the X509Certificate passed as a request header through SSL termination and
@@ -43,11 +44,11 @@ import java.util.regex.Pattern;
  */
 public class X509CertificateAuthenticationValve extends ValveBase {
 
-    private static final String X509_REQUEST_HEADER = "X-SSL-CERT";
     private static final String X509CERT_NAME = "X509";
     private static final String CERT_PEM_START = "[-]+(BEGIN CERTIFICATE)[-]+[\t]*[\n]*";
     private static final String CERT_PEM_END = "[-]+(END CERTIFICATE)[-]+";
     private static final Pattern PATTERN = Pattern.compile(CERT_PEM_START + "([^-]+)" + CERT_PEM_END);
+    private X509ServerConfiguration config = null;
 
     private static Log log = LogFactory.getLog(X509CertificateAuthenticationValve.class);
 
@@ -85,7 +86,7 @@ public class X509CertificateAuthenticationValve extends ValveBase {
     private X509Certificate getCertificate(Request request) {
 
         X509Certificate certificate = null;
-        String pemCert = request.getHeader(X509_REQUEST_HEADER);
+        String pemCert = request.getHeader(getX509HeaderName());
         if (StringUtils.isNotEmpty(pemCert)) {
             Matcher matcher = PATTERN.matcher(pemCert);
             if (matcher.matches()) {
@@ -101,5 +102,12 @@ public class X509CertificateAuthenticationValve extends ValveBase {
             }
         }
         return certificate;
+    }
+
+    private String getX509HeaderName() {
+
+        config = X509ServerConfiguration.getInstance();
+        String x509HeaderName = config.getX509requestHeader();
+        return x509HeaderName;
     }
 }
