@@ -86,7 +86,7 @@ public class X509CertificateAuthenticationValve extends ValveBase {
     private X509Certificate getCertificate(Request request) {
 
         X509Certificate certificate = null;
-        String pemCert = request.getHeader(getX509HeaderName());
+        String pemCert = request.getHeader(getX509RequestHeaderName());
         if (StringUtils.isNotEmpty(pemCert)) {
             Matcher matcher = PATTERN.matcher(pemCert);
             if (matcher.matches()) {
@@ -104,7 +104,11 @@ public class X509CertificateAuthenticationValve extends ValveBase {
         return certificate;
     }
 
-    private String getX509HeaderName() {
+    /**
+     *  Get the name of X509Certificate request header.
+     * @return header name
+     */
+    private String getX509RequestHeaderName() {
 
         config = X509ServerConfiguration.getInstance();
         String x509HeaderName = config.getX509requestHeader();
