@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.identity.authenticator.x509cert.valve.config;
 
 import org.apache.axiom.om.OMElement;
@@ -14,12 +32,13 @@ public class X509ServerConfiguration {
     private static Log log = LogFactory.getLog(X509ServerConfiguration.class);
     private static X509ServerConfiguration instance;
     private static final String CONFIG_ELEM_X509 = "X509";
+    private static final String CONFIG_ELEM_X509_REQUEST_HEADER = "X509RequestHeaderName";
 
     private String x509requestHeader = "X-SSL-CERT";
 
     private X509ServerConfiguration() {
 
-        buildOAuthServerConfiguration();
+        buildX509ServerConfiguration();
     }
 
     public static X509ServerConfiguration getInstance() {
@@ -43,33 +62,29 @@ public class X509ServerConfiguration {
         return x509requestHeader;
     }
 
-    private void buildOAuthServerConfiguration() {
+    private void buildX509ServerConfiguration() {
 
         IdentityConfigParser configParser = IdentityConfigParser.getInstance();
         OMElement x509Elem = configParser.getConfigElement(CONFIG_ELEM_X509);
 
         if (x509Elem == null) {
-            warnOnFaultyConfiguration("X509 element is not available.");
+            log.debug("X509 Request header configuration is not enabled");
             return;
         }
 
         // Read X509 Configurations.
-        parseX509ServerValidators(x509Elem);
+        parseX509ServerConfigurations(x509Elem);
     }
 
-    private void parseX509ServerValidators(OMElement x509Elem) {
+    private void parseX509ServerConfigurations(OMElement x509Elem) {
 
         // Get the configured name of the X509Request header.
-        if (x509Elem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.X509_REQUEST_HEADER)) != null) {
-            x509requestHeader =
-                    x509Elem.getFirstChildWithName(getQNameWithIdentityNS(ConfigElements.X509_REQUEST_HEADER))
-                            .getText().trim();
+        String requestHeaderName =
+                x509Elem.getFirstChildWithName(getQNameWithIdentityNS(CONFIG_ELEM_X509_REQUEST_HEADER))
+                        .getText().trim();
+        if (requestHeaderName != null) {
+            x509requestHeader = requestHeaderName;
         }
-    }
-
-    private void warnOnFaultyConfiguration(String logMsg) {
-
-        log.warn("Error in X509 Configuration. " + logMsg);
     }
 
     private QName getQNameWithIdentityNS(String localPart) {
@@ -77,9 +92,4 @@ public class X509ServerConfiguration {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 
-    private class ConfigElements {
-
-        // X509 Request header
-        public static final String X509_REQUEST_HEADER = "X509RequestHeaderName";
-    }
 }

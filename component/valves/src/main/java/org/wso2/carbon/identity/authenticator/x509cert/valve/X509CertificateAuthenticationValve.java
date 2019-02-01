@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.identity.authenticator.x509cert.valve;
 
+import org.apache.axiom.om.util.Base64;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
@@ -33,7 +34,6 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -91,8 +91,8 @@ public class X509CertificateAuthenticationValve extends ValveBase {
             Matcher matcher = PATTERN.matcher(pemCert);
             if (matcher.matches()) {
                 String pemCertBody = pemCert.replaceAll(CERT_PEM_START, "").replaceAll(CERT_PEM_END, "");
-                byte[] certificateData = Base64.getMimeDecoder().decode(pemCertBody);
 
+                byte[] certificateData = Base64.decode(pemCertBody);
                 try {
                     CertificateFactory cf = CertificateFactory.getInstance(X509CERT_NAME);
                     certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateData));
