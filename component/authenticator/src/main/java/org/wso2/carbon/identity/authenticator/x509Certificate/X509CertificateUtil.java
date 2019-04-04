@@ -324,7 +324,7 @@ public class X509CertificateUtil {
             throws UserStoreException, AuthenticationFailedException {
 
         boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
-                (userName);
+                (MultitenantUtils.getTenantAwareUsername(userName));
         if (isUserExist) {
             if (log.isDebugEnabled()) {
                 log.debug("User exists with the user name: " + userName);
