@@ -41,6 +41,8 @@ public class X509CertificateConstants {
     public static final String AUTHENTICATION_ENDPOINT = "https://localhost:8443/x509-certificate-servlet";
     public static final String AUTHENTICATION_ENDPOINT_PARAMETER = "AuthenticationEndpoint";
     public static final String USERNAME = "username";
+    public static final String USER_NAME_REGEX = "UsernameRegex";
+    public static final String AlTN_NAMES_REGEX= "AlternativeNamesRegex";
     public static final String ENFORCE_SELF_REGISTRATION = "EnforceSelfRegistration";
     public static final String SUCCESS = "success";
     public static final String RETRY_PARAM_FOR_CHECKING_CERTIFICATE =
@@ -56,5 +58,14 @@ public class X509CertificateConstants {
     public static final String USER_NOT_FOUND = "17001";
     public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "18015";
     public static final String X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE = "17003";
+    public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_REGEX_MULTIPLE_MATCHES_ERROR_CODE = "17004";
+    public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_REGEX_NO_MATCHES_ERROR_CODE = "17005";
+    public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_MULTIPLE_MATCHES_ERROR_CODE = "17006";
+    public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR_CODE = "17007";
+    public static final String X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR_CODE = "17008";
+    public static final String X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR = "Regex Configured but no alternative "
+            + "names in the certificate";
+    public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR = "Regex configured but no matching "
+            + "subjectRDN found for the given regex";
 
 }
