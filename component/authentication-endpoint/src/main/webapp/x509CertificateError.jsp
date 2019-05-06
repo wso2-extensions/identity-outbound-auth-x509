@@ -57,7 +57,10 @@
                     errorMessage = resourceBundle.getString("not.valid.certificate");
                 } else if (errorCode.equalsIgnoreCase("17003")) {
                     errorMessage = resourceBundle.getString("fail.validation.certificate");
-                }
+                } else if (errorCode.equalsIgnoreCase("17004"))  {
+                    errorMessage = resourceBundle.getString("multipleMatchesFound.error.message");
+                } else if (errorCode.equalsIgnoreCase("17005"))  {
+                    errorMessage = resourceBundle.getString("noMatchesFound.error.message");
             }
         }
     %>
