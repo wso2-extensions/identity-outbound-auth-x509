@@ -146,9 +146,15 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 if (alternativeNamePattern != null) {
                      alternativeName = buildAlternativeNames(cert, authenticationContext, alternativeNamePattern);
                      validateUsingSubject(alternativeName, authenticationContext, cert, claims);
+                     if(log.isDebugEnabled()){
+                         log.debug("Certificate validated using the alternative name: " + alternativeName);
+                     }
                 } else if (subjectAttributePattern != null){
                     subjectAttribute = getMatchedSubjectAttribute(certAttributes, subjectAttributePattern, authenticationContext);
                     validateUsingSubject(subjectAttribute, authenticationContext, cert, claims);
+                    if(log.isDebugEnabled()){
+                        log.debug("Certificate validated using the certificate subject attribute: " + subjectAttribute);
+                    }
                 } else {
                     String userName = (String) authenticationContext
                             .getProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME);
@@ -159,6 +165,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                                 "Couldn't find the username for X509Certificate's attribute");
                     } else {
                         validateUsingSubject(userName, authenticationContext, cert, claims);
+                        if(log.isDebugEnabled()){
+                            log.debug("Certificate validated using the certificate username attribute: " + userName);
+                        }
                     }
                 }
             } else {
@@ -375,9 +384,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         try {
             Collection<List<?>> altNames = cert.getSubjectAlternativeNames();
             if (altNames != null) {
-                    if (alternativeNamesPatternCompiled == null) {
-                        alternativeNamesPatternCompiled = Pattern.compile(alternativeNamePattern);
-                    }
+                if (alternativeNamesPatternCompiled == null) {
+                    alternativeNamesPatternCompiled = Pattern.compile(alternativeNamePattern);
+                }
                 for (List item : altNames) {
                     ASN1InputStream decoder = null;
                     if (item.toArray()[1] instanceof byte[])
@@ -398,13 +407,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 }
             } else {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                        X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR_CODE );
-                throw new AuthenticationFailedException(X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR);
+                        X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR_CODE);
+                throw new AuthenticationFailedException(
+                        X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR);
             }
-
         } catch (CertificateParsingException | IOException e) {
             throw new AuthenticationFailedException("Failed to Parse the certificate");
-
         }
         if (matches.isEmpty()) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
@@ -416,13 +424,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throw new AuthenticationFailedException("More than one match for the given regex");
         } else if (matches.size() == 1) {
             return matches.get(0);
-
         } else {
             return null;
         }
     }
 
-    private boolean validateUsingSubject(String subject, AuthenticationContext authenticationContext,
+    private void validateUsingSubject(String subject, AuthenticationContext authenticationContext,
             X509Certificate cert, Map<ClaimMapping, String> claims) throws AuthenticationFailedException {
 
         byte[] data;
@@ -442,8 +449,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             }
             String authenticatedUserName = authenticatedUser.getAuthenticatedSubjectIdentifier();
             if (authenticatedUserName.equals(subject)) {
-                addOrValidateCertificate(subject, authenticationContext ,data ,claims, cert);
-                return true;
+                addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
             } else {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USERNAME_CONFLICT);
@@ -451,8 +457,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                         "Couldn't find X509 certificate to this authenticated user: " + authenticatedUserName);
             }
         } else {
-            addOrValidateCertificate(subject, authenticationContext ,data ,claims, cert);
-            return true;
+            addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
         }
     }
 
