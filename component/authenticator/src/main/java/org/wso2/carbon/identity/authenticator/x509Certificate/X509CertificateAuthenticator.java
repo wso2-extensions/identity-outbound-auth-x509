@@ -407,9 +407,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 }
             } else {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                        X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR_CODE);
+                        X509CertificateConstants.X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR_CODE);
                 throw new AuthenticationFailedException(
-                        X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR);
+                        X509CertificateConstants.X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR);
             }
         } catch (CertificateParsingException | IOException e) {
             throw new AuthenticationFailedException("Failed to Parse the certificate");

@@ -206,7 +206,7 @@ public class X509CertificateAuthenticatorTest {
         return new Object[][] {
                 {
                         obj1, authenticatorConfig1, sequenceConfig1, true,
-                        X509CertificateConstants.X509_CERTIFICATE_NO_ALTERNATIVE_NAMES_ERROR
+                        X509CertificateConstants.X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR
                 }, { obj2, authenticatorConfig2, sequenceConfig2, false, "" },
                 { obj3, authenticatorConfig3, sequenceConfig3, false, "" }, {
                         obj4, authenticatorConfig4, sequenceConfig4, true,
