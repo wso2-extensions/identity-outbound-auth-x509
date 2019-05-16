@@ -58,7 +58,14 @@ public class X509CertificateConstants {
     public static final String USER_NOT_FOUND = "17001";
     public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "18015";
     public static final String X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE = "17003";
-    public static final String X509_CERTIFICATE_REGEX_ERROR_CODE = "17004";
-    public static final String X509_CERTIFICATE_NO_MATCHES_ERROR_CODE = "17005";
+    public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_REGEX_MULTIPLE_MATCHES_ERROR_CODE = "17004";
+    public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_REGEX_NO_MATCHES_ERROR_CODE = "17005";
+    public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_MULTIPLE_MATCHES_ERROR_CODE = "17006";
+    public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR_CODE = "17007";
+    public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR_CODE = "17008";
+    public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR = "Regex Configured but no alternative "
+            + "names in the certificate";
+    public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR = "Regex configured but no matching "
+            + "subjectRDN found for the given regex";
 
 }
