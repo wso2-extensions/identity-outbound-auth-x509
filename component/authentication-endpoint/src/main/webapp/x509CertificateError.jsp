@@ -59,19 +59,19 @@
                     errorMessage = resourceBundle.getString("fail.validation.certificate");
                 } else if (errorCode.equalsIgnoreCase("17004")) {
                     errorMessage = resourceBundle.getString(
-                            "x509certificateauthenticator.alternativenames.regex.multiplematches.error.message");
+                            "x509certificateauthenticator.alternativenames.regex.multiplematches.code.17004.error.message");
                 } else if (errorCode.equalsIgnoreCase("17005")) {
                     errorMessage = resourceBundle
-                            .getString("x509certificateauthenticator.alternativenames.regex.nomatches.error.message");
+                            .getString("x509certificateauthenticator.alternativenames.regex.nomatches.code.17005.error.message");
                 } else if (errorCode.equalsIgnoreCase("17006")) {
                     errorMessage = resourceBundle
-                            .getString("x509certificateauthenticator.subjectdn.regex.multiplematches.error.message");
+                            .getString("x509certificateauthenticator.subjectdn.regex.multiplematches.code.17006.error.message");
                 } else if (errorCode.equalsIgnoreCase("17007")) {
                     errorMessage = resourceBundle
-                            .getString("x509certificateauthenticator.subjectdn.regex.nomatches.error.message");
+                            .getString("x509certificateauthenticator.subjectdn.regex.nomatches.code.17007.error.message");
                 } else if (errorCode.equalsIgnoreCase("17008")) {
                     errorMessage = resourceBundle
-                            .getString("x509certificateauthenticator.alternativenames.notfound.error.message");
+                            .getString("x509certificateauthenticator.alternativenames.notfound.code.17008.error.message");
                 }
             }
         }
