@@ -119,7 +119,7 @@ public class X509CertificateAuthenticatorTest {
             + "lnAa+yj6cL7kyF145DfB1QyUL4+tpEsiUBnFf6QaROEPhBZ9xl61zhg+6W8g+4q9\n" + "sPI+QGNS48ZDpXWJ8mXDTw0LoBuYKiKH";
 
     @DataProvider(name = "provideX509Certificates")
-    public Object[][] createCertificates() throws Exception {
+    public Object[][] provideTestData() throws Exception {
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         X509Certificate cert1 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(CERTIFICATE_1)));
