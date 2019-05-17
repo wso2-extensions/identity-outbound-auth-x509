@@ -62,7 +62,6 @@ import java.util.regex.Pattern;
 public class X509CertificateAuthenticator extends AbstractApplicationAuthenticator implements
         LocalApplicationAuthenticator {
 
-
     private Pattern alternativeNamesPatternCompiled;
     private Pattern subjectPatternCompiled;
     private String subjectAttributePattern;
@@ -83,7 +82,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             subjectPatternCompiled = Pattern.compile(subjectAttributePattern);
         }
     }
-
 
     /**
      * Initialize the process and call servlet .
