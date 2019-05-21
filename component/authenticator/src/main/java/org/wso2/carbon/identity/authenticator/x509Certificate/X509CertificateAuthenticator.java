@@ -160,18 +160,18 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 String subjectAttribute;
                 if (alternativeNamePattern != null) {
                      alternativeName = getMatchedAlternativeName(cert, authenticationContext);
-                     validateUsingSubject(appendTenantDomain(alternativeName,authenticationContext.getTenantDomain()),
-                             authenticationContext, cert, claims);
+                     validateUsingSubject(alternativeName, authenticationContext, cert, claims);
                      if(log.isDebugEnabled()){
                          log.debug("Certificate validated using the alternative name: " + alternativeName);
                      }
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, alternativeName);
                 } else if (subjectAttributePattern != null){
                     subjectAttribute = getMatchedSubjectAttribute(certAttributes, authenticationContext);
-                    validateUsingSubject(appendTenantDomain(subjectAttribute,authenticationContext.getTenantDomain()),
-                            authenticationContext, cert, claims);
+                    validateUsingSubject(subjectAttribute, authenticationContext, cert, claims);
                     if(log.isDebugEnabled()){
                         log.debug("Certificate validated using the certificate subject attribute: " + subjectAttribute);
                     }
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, subjectAttribute);
                 } else {
                     String userName = (String) authenticationContext
                             .getProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME);
@@ -509,15 +509,5 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
     }
 
-    /**
-     * append the tenant domain to the subject.
-     *
-     * @param subject matched string or the username that uses to authenticate.
-     */
-    private String appendTenantDomain(String subject, String tenantDomain){
-
-        subject = subject+"@"+tenantDomain;
-        return subject;
-    }
 
 }
