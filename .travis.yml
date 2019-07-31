@@ -1,0 +1,9 @@
+language: java
+jdk:
+    - openjdk7
+    - oraclejdk7
+cache:
+  directories:
+  - .autoconf
+  - $HOME/.m2
+script: mvn clean install
