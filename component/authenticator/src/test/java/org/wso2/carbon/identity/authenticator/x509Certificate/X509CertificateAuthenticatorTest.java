@@ -102,6 +102,28 @@ public class X509CertificateAuthenticatorTest {
                     + "wVOoya8lZDYa2MmU0f1L7nfRMHFxOq7xhvC1PUN/x5lGFNa67QczrWXMTUExzHLC\n"
                     + "qhoVNobDF97I7jJcSDoPLnw9kzIC+izUz82LphFa332QezoYgeU=";
 
+    private static final String CERT_WITH_SIMILAR_ALTERNATIVE_NAMES =
+            "MIIDsDCCApigAwIBAgIJAK4zivrElc0IMA0GCSqGSIb3DQEBCwUAMIGDMREwDwYD\n" +
+                    "VQQDDAhCdWRkaGltYTELMAkGA1UEBhMCU0wxEDAOBgNVBAgMB1dlc3Rlcm4xEDAO\n" +
+                    "BgNVBAcMB0NvbG9tYm8xDTALBgNVBAoMBFdTTzIxCzAJBgNVBAsMAlFBMSEwHwYJ\n" +
+                    "KoZIhvcNAQkBFhJidWRkaGltYXVAd3NvMi5jb20wIBcNMTkwNzE2MDQyMzEwWhgP\n" +
+                    "MzAxODExMTYwNDIzMTBaMIGDMREwDwYDVQQDDAhCdWRkaGltYTELMAkGA1UEBhMC\n" +
+                    "U0wxEDAOBgNVBAgMB1dlc3Rlcm4xEDAOBgNVBAcMB0NvbG9tYm8xDTALBgNVBAoM\n" +
+                    "BFdTTzIxCzAJBgNVBAsMAlFBMSEwHwYJKoZIhvcNAQkBFhJidWRkaGltYXVAd3Nv\n" +
+                    "Mi5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCpZ7WOU16ixjbC\n" +
+                    "bXdwGraMnqnlgoi303yiQqlp2K9VNfGOmgNQatWen0t1UVr61wF8yYGh2rsYgn+a\n" +
+                    "8paufQUPCYZxTEGQiOdOgDMpNmYo6du6+c/zrjpsgphyHr14FOTp1iTCIpfjupV1\n" +
+                    "wPTyroyDrHdo2Jn8r7WqurIIU4AbYA7ckuUj/KjaJ/M6kf+pDWyIRoh0JLReYc8Q\n" +
+                    "ynhXr7kAjyFqj6+gZwAbHxrHkrEsa2hV44PRWZ1PPDqL+0UO/xMaAnnvwltgxBUi\n" +
+                    "HKQ1WX5puUOh/dA49oDllJkhzqwgyx41sQXlSaVgJjITeWRBgo6xzj3fwuozpFKX\n" +
+                    "o4ZypHL3AgMBAAGjIzAhMB8GA1UdEQQYMBaCBHdzbzKCCHdzbzIuY29tggR3c28y\n" +
+                    "MA0GCSqGSIb3DQEBCwUAA4IBAQBSK0JkZrbZobdC4xYHmHryUnFUnFYYAofg4LUF\n" +
+                    "BQmlCcCJGFpGPm7fCXs4cHxgHOU3yJHmCjXiOEE76w8HSCQqXd6dNHL1FLm7JjA5\n" +
+                    "LFflxbYsNreU5ZINdDTfoZlRItt2Gx2ZHkzcATIfmrPSp85vX8Fzmfm3AU5i3qWe\n" +
+                    "8kf2fNgB9LlNWDY5WOiiYGQc+FMwYgKp2d4c7w3+ZtSQrVG/Xtjja2XWOWvmlWwK\n" +
+                    "pxozr62/M7TRedsxI5Oto2oXLFezu1GBXwi4AZzjLHUl5jRGhLnCYkNjufFf/DCG\n" +
+                    "yAVvzLUt0gatoGIu5vxoekNIUeya6iG2AhocJc4HBLOyxMq7";
+
     private static final String CERT_WITH_ONE_CN_NO_AlTERNATIVE_NAMES =
             "MIIDhDCCAmwCCQCbjLuYujEEOjANBgkqhkiG9w0BAQsFADCBgjELMAkGA1UEBhMC\n"
                     + "U0wxEDAOBgNVBAgMB1dlc3Rlcm4xETAPBgNVBAcMCFRhbmdhbGxlMQ0wCwYDVQQK\n"
@@ -267,6 +289,19 @@ public class X509CertificateAuthenticatorTest {
         parameterMap6.put(X509CertificateConstants.USER_NAME_REGEX, "[a-zA-Z]{3}\\d");
         authenticatorConfig6.setParameterMap(parameterMap6);
 
+        // Authenticate Using similar alternative names.
+        X509Certificate cert7 = (X509Certificate) factory
+                .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
+                        CERT_WITH_SIMILAR_ALTERNATIVE_NAMES)));
+        X509Certificate certificateArrayObject7[] = { cert7, null };
+
+        AuthenticatorConfig authenticatorConfig7 = new AuthenticatorConfig();
+        Map<String, String> parameterMap7 = new HashMap<>();
+        parameterMap7.put(X509CertificateConstants.AlTN_NAMES_REGEX, "^.*wso2$");
+        parameterMap7.put(X509CertificateConstants.USER_NAME_REGEX, "^[a-zA-Z]{3}.[a-zA-Z]{2}$");
+        parameterMap7.put(X509CertificateConstants.USERNAME, "CN");
+        authenticatorConfig7.setParameterMap(parameterMap7);
+        
         return new Object[][] {
                 {
                         certificateArrayObject1, authenticatorConfig1, sequenceConfig1, true,
@@ -286,6 +321,9 @@ public class X509CertificateAuthenticatorTest {
                 },
                 {
                         certificateArrayObject6, authenticatorConfig6, sequenceConfig4, false, ""
+                },
+                {
+                        certificateArrayObject7, authenticatorConfig7, sequenceConfig2, false, ""
                 },
                 };
     }
