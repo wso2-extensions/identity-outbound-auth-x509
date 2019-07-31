@@ -31,6 +31,8 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -49,7 +51,8 @@ import static org.testng.Assert.fail;
 /**
  * Tests for X509CertificateAuthenticator.
  */
-@PrepareForTest({X509CertificateAuthenticator.class, X509CertificateUtil.class, FrameworkUtils.class})
+@PrepareForTest({X509CertificateAuthenticator.class, X509CertificateUtil.class, FrameworkUtils.class, IdentityUtil
+        .class})
 @PowerMockIgnore({ "javax.xml.*"})
 public class X509CertificateAuthenticatorTest {
 
@@ -324,6 +327,8 @@ public class X509CertificateAuthenticatorTest {
         when(X509CertificateUtil
                 .validateCertificate(Matchers.anyString(), Matchers.any(AuthenticationContext.class), any(byte[].class),
                         Matchers.anyBoolean())).thenReturn(true);
+        mockStatic(IdentityUtil.class);
+        when(IdentityUtil.getPrimaryDomainName()).thenReturn("PRIMARY");
         if (exceptionShouldThrown) {
             try {
                 spy.process(mockRequest, mockResponse, authenticationContext);
