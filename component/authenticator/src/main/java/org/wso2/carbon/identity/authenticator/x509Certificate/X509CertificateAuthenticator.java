@@ -51,8 +51,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -214,7 +216,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throw new AuthenticationFailedException("error occurred while get the certificate claims", e);
         }
         String userNameAttribute = getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.USERNAME);
-        List<String> matchedStringList = new ArrayList<>();
+        Set<String> matchedStringList = new HashSet<>();
         for (Rdn distinguishNames : ldapDN.getRdns()) {
             if (subjectPatternCompiled != null && userNameAttribute.equals(distinguishNames.getType())) {
                 Matcher m = subjectPatternCompiled.matcher(String.valueOf(distinguishNames.getValue()));
@@ -224,20 +226,26 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         if (matchedStringList.isEmpty()) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR_CODE);
-            log.debug(X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR);
+            if (log.isDebugEnabled()) {
+                log.debug(X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR);
+            }
             throw new AuthenticationFailedException(X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR);
         } else if (matchedStringList.size() > 1) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_MULTIPLE_MATCHES_ERROR_CODE);
-            log.debug("More than one value matched with the given regex, matches: " + Arrays.toString(matchedStringList.toArray()));
+            if (log.isDebugEnabled()) {
+                log.debug("More than one value matched with the given regex, matches: " +
+                        Arrays.toString(matchedStringList.toArray()));
+            }
             throw new AuthenticationFailedException("More than one value matched with the given regex");
         } else {
+            String matchedString = matchedStringList.toArray(new String[0])[0];
             if (log.isDebugEnabled()) {
                 log.debug("Setting X509Certificate username attribute: " + userNameAttribute + " ,and value is "
-                        + matchedStringList.get(0));
+                        + matchedString);
             }
-            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, matchedStringList.get(0));
-            return matchedStringList.get(0);
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, matchedString);
+            return matchedString;
         }
     }
 
@@ -405,7 +413,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      */
     private String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
 
-        List<String> matchedAlternativeNamesList = new ArrayList<>();
+        Set<String> matchedAlternativeNamesList = new HashSet<>();
         try {
             Collection<List<?>> altNames = cert.getSubjectAlternativeNames();
             if (altNames != null) {
@@ -441,7 +449,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     X509CertificateConstants.X509_CERTIFICATE_ALTERNATIVE_NAMES_REGEX_MULTIPLE_MATCHES_ERROR_CODE);
             throw new AuthenticationFailedException("More than one match for the given regex");
         } else {
-            return matchedAlternativeNamesList.get(0);
+            return matchedAlternativeNamesList.toArray(new String[0])[0];
         }
 
     }
@@ -502,7 +510,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
     }
 
-    private void addMatchStringsToList(Matcher matcher, List matches) {
+    private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
 
         while (matcher.find()) {
             matches.add(matcher.group());
