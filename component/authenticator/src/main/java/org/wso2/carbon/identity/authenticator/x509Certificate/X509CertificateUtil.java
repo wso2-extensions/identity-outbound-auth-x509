@@ -49,7 +49,7 @@ import java.util.Map;
  * Working with certificate and claims store.
  */
 public class X509CertificateUtil {
-    private static Log log = LogFactory.getLog(X509CertificateUtil.class);
+    private static final Log log = LogFactory.getLog(X509CertificateUtil.class);
 
     /**
      * Get certificate from claims.

@@ -30,7 +30,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  */
 public class X509CertificateRealmServiceComponent {
 
-    private static Log log = LogFactory.getLog(X509CertificateRealmServiceComponent.class);
+    private static final Log log = LogFactory.getLog(X509CertificateRealmServiceComponent.class);
     private static RealmService realmService = null;
 
     /**
