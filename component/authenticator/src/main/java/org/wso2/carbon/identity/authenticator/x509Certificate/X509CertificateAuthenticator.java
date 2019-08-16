@@ -69,7 +69,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private String subjectAttributePattern;
     private String alternativeNamePattern;
 
-    private static Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
+    private static final Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
 
     public X509CertificateAuthenticator(){
 
