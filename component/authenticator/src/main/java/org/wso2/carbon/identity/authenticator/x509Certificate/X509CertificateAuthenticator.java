@@ -37,6 +37,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -68,7 +69,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private Pattern subjectPatternCompiled;
     private String subjectAttributePattern;
     private String alternativeNamePattern;
-    private String X509UserStoreName;
+    private String x509UserStoreName;
 
     private static final Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
 
@@ -78,7 +79,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 .get(X509CertificateConstants.USER_NAME_REGEX);
         alternativeNamePattern = getAuthenticatorConfig().getParameterMap()
                 .get(X509CertificateConstants.AlTN_NAMES_REGEX);
-        X509UserStoreName = getAuthenticatorConfig().getParameterMap()
+        x509UserStoreName = getAuthenticatorConfig().getParameterMap()
                 .get(X509CertificateConstants.X509_USER_STORE_NAME);
         if (alternativeNamePattern != null) {
             alternativeNamesPatternCompiled = Pattern.compile(alternativeNamePattern);
@@ -165,8 +166,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 String subjectAttribute;
                 if (alternativeNamePattern != null) {
                      alternativeName = getMatchedAlternativeName(cert, authenticationContext);
-                     if (X509UserStoreName != null) {
-                         alternativeName = X509UserStoreName + "/" + alternativeName;
+                     if (x509UserStoreName != null) {
+                         alternativeName = UserCoreUtil.addDomainToName(alternativeName, x509UserStoreName);
                      }
                      validateUsingSubject(alternativeName, authenticationContext, cert, claims);
                      if(log.isDebugEnabled()){
@@ -175,8 +176,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, alternativeName);
                 } else if (subjectAttributePattern != null){
                     subjectAttribute = getMatchedSubjectAttribute(certAttributes, authenticationContext);
-                    if (X509UserStoreName != null) {
-                        subjectAttribute = X509UserStoreName + "/" + subjectAttribute;
+                    if (x509UserStoreName != null) {
+                        subjectAttribute = UserCoreUtil.addDomainToName(subjectAttribute, x509UserStoreName);
                     }
                     validateUsingSubject(subjectAttribute, authenticationContext, cert, claims);
                     if(log.isDebugEnabled()){
