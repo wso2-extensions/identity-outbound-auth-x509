@@ -68,6 +68,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private Pattern subjectPatternCompiled;
     private String subjectAttributePattern;
     private String alternativeNamePattern;
+    private String X509UserStoreName;
 
     private static final Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
 
@@ -77,6 +78,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 .get(X509CertificateConstants.USER_NAME_REGEX);
         alternativeNamePattern = getAuthenticatorConfig().getParameterMap()
                 .get(X509CertificateConstants.AlTN_NAMES_REGEX);
+        X509UserStoreName = getAuthenticatorConfig().getParameterMap()
+                .get(X509CertificateConstants.X509_USER_STORE_NAME);
         if (alternativeNamePattern != null) {
             alternativeNamesPatternCompiled = Pattern.compile(alternativeNamePattern);
         }
@@ -162,6 +165,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 String subjectAttribute;
                 if (alternativeNamePattern != null) {
                      alternativeName = getMatchedAlternativeName(cert, authenticationContext);
+                     if (X509UserStoreName != null) {
+                         alternativeName = X509UserStoreName + "/" + alternativeName;
+                     }
                      validateUsingSubject(alternativeName, authenticationContext, cert, claims);
                      if(log.isDebugEnabled()){
                          log.debug("Certificate validated using the alternative name: " + alternativeName);
@@ -169,6 +175,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, alternativeName);
                 } else if (subjectAttributePattern != null){
                     subjectAttribute = getMatchedSubjectAttribute(certAttributes, authenticationContext);
+                    if (X509UserStoreName != null) {
+                        subjectAttribute = X509UserStoreName + "/" + subjectAttribute;
+                    }
                     validateUsingSubject(subjectAttribute, authenticationContext, cert, claims);
                     if(log.isDebugEnabled()){
                         log.debug("Certificate validated using the certificate subject attribute: " + subjectAttribute);
@@ -206,7 +215,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param authenticationContext authentication context
      * @throws AuthenticationFailedException
      */
-    private String getMatchedSubjectAttribute(String certAttributes, AuthenticationContext authenticationContext)
+    protected String getMatchedSubjectAttribute(String certAttributes, AuthenticationContext authenticationContext)
             throws AuthenticationFailedException {
 
         LdapName ldapDN;
@@ -259,7 +268,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  X509 certificate
      * @throws AuthenticationFailedException
      */
-    private void addOrValidateCertificate(String userName, AuthenticationContext authenticationContext, byte[] data,
+    protected void addOrValidateCertificate(String userName, AuthenticationContext authenticationContext, byte[] data,
                                           Map<ClaimMapping, String> claims, X509Certificate cert) throws
             AuthenticationFailedException {
 
@@ -328,7 +337,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param authenticationContext authentication context
      * @return username username
      */
-    private AuthenticatedUser getUsername(AuthenticationContext authenticationContext) {
+    protected AuthenticatedUser getUsername(AuthenticationContext authenticationContext) {
         AuthenticatedUser authenticatedUser = null;
         for (int i = 1; i <= authenticationContext.getSequenceConfig().getStepMap().size(); i++) {
             StepConfig stepConfig = authenticationContext.getSequenceConfig().getStepMap().get(i);
@@ -386,7 +395,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  x509 certificate.
      * @param authenticationContext authentication context.
      */
-    private void allowUser(String userName, Map claims, X509Certificate cert,
+    protected void allowUser(String userName, Map claims, X509Certificate cert,
                            AuthenticationContext authenticationContext) {
         AuthenticatedUser authenticatedUserObj;
         authenticatedUserObj = AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(userName);
@@ -411,7 +420,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  x509 certificate.
      * @param authenticationContext authenticationContext
      */
-    private String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
+    protected String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
 
         Set<String> matchedAlternativeNamesList = new HashSet<>();
         try {
@@ -459,7 +468,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      *
      * @param decoder ASN1 Decoder
      */
-    private String decodeAlternativeName(ASN1InputStream decoder) throws IOException {
+    protected String decodeAlternativeName(ASN1InputStream decoder) throws IOException {
 
         DEREncodable encoded = decoder.readObject();
         encoded = ((DERSequence) encoded).getObjectAt(1);
@@ -476,7 +485,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  x509 certificate.
      * @param claims                user claims.
      */
-    private void validateUsingSubject(String subject, AuthenticationContext authenticationContext,
+    protected void validateUsingSubject(String subject, AuthenticationContext authenticationContext,
             X509Certificate cert, Map<ClaimMapping, String> claims) throws AuthenticationFailedException {
 
         byte[] data;
@@ -510,7 +519,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
     }
 
-    private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
+    protected void addMatchStringsToList(Matcher matcher, Set<String> matches) {
 
         while (matcher.find()) {
             matches.add(matcher.group());
