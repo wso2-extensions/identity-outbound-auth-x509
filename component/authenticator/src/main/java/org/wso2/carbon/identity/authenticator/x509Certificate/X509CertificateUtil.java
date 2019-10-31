@@ -333,11 +333,11 @@ public class X509CertificateUtil {
         } else if (filteredUsers.length > 1) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.USERNAME_CONFLICT);
-            throw new AuthenticationFailedException(" Conflicting users with user name: " + userName);
+            throw new AuthenticationFailedException("Conflicting users with user name: " + userName);
         } else {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.USER_NOT_FOUND);
-            throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
+            throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
         }
     }
 
