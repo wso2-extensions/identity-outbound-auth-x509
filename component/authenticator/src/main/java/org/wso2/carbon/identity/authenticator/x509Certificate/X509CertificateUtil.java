@@ -323,13 +323,17 @@ public class X509CertificateUtil {
     private static boolean isUserExists(String userName, AuthenticationContext authenticationContext)
             throws UserStoreException, AuthenticationFailedException {
 
-        boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
-                (MultitenantUtils.getTenantAwareUsername(userName));
-        if (isUserExist) {
+        String[] filteredUsers = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().listUsers
+                (MultitenantUtils.getTenantAwareUsername(userName),X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
+        if(filteredUsers.length==1){
             if (log.isDebugEnabled()) {
                 log.debug("User exists with the user name: " + userName);
             }
             return true;
+        } else if (filteredUsers.length>1){
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.USERNAME_CONFLICT);
+            throw new AuthenticationFailedException(" Conflicting users in user stores. ");
         } else {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.USER_NOT_FOUND);
