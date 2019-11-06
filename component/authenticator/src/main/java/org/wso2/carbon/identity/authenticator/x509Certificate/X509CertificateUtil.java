@@ -323,17 +323,36 @@ public class X509CertificateUtil {
     private static boolean isUserExists(String userName, AuthenticationContext authenticationContext)
             throws UserStoreException, AuthenticationFailedException {
 
-        boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
-                (MultitenantUtils.getTenantAwareUsername(userName));
-        if (isUserExist) {
-            if (log.isDebugEnabled()) {
-                log.debug("User exists with the user name: " + userName);
+        if (Boolean.valueOf(getX509Parameters().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))){
+            String[] filteredUsers = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().listUsers
+                    (MultitenantUtils.getTenantAwareUsername(userName), X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
+            if (filteredUsers.length == 1) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User exists with the user name: " + userName);
+                }
+                return true;
+            } else if (filteredUsers.length > 1) {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USERNAME_CONFLICT);
+                throw new AuthenticationFailedException("Conflicting users with user name: " + userName);
+            } else {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USER_NOT_FOUND);
+                throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
             }
-            return true;
         } else {
-            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                    X509CertificateConstants.USER_NOT_FOUND);
-            throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
+            boolean isUserExist = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().isExistingUser
+                    (MultitenantUtils.getTenantAwareUsername(userName));
+            if (isUserExist) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User exists with the user name: " + userName);
+                }
+                return true;
+            } else {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USER_NOT_FOUND);
+                throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
+            }
         }
     }
 

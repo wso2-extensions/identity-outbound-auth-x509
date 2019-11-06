@@ -67,5 +67,7 @@ public class X509CertificateConstants {
             + "names in the certificate";
     public static final String X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR = "Regex configured but no matching "
             + "subjectRDN found for the given regex";
+    public static final int MAX_ITEM_LIMIT_UNLIMITED = -1;
+    public static final String SEARCH_ALL_USERSTORES = "SearchAllUserStores";
 
 }
