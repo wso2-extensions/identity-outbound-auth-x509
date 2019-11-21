@@ -34,6 +34,7 @@ import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationVal
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManagerImpl;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -323,7 +324,7 @@ public class X509CertificateUtil {
     private static boolean isUserExists(String userName, AuthenticationContext authenticationContext)
             throws UserStoreException, AuthenticationFailedException {
 
-        if (Boolean.valueOf(getX509Parameters().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))){
+        if (Boolean.valueOf(getX509Parameters().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
             String[] filteredUsers = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().listUsers
                     (MultitenantUtils.getTenantAwareUsername(userName), X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
             if (filteredUsers.length == 1) {
@@ -335,6 +336,20 @@ public class X509CertificateUtil {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USERNAME_CONFLICT);
                 throw new AuthenticationFailedException("Conflicting users with user name: " + userName);
+            } else if (getX509Parameters().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
+                for (String multiAttributeClaimUri : getX509Parameters()
+                        .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",")) {
+                    String[] usersWithClaim = ((AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userName)
+                            .getUserStoreManager()).getUserList(multiAttributeClaimUri, userName, null);
+                    if (usersWithClaim.length == 1) {
+                        return true;
+                    } else if (usersWithClaim.length > 1) {
+                        authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                                X509CertificateConstants.USERNAME_CONFLICT);
+                        throw new AuthenticationFailedException("Conflicting users with claim value: " + userName);
+                    }
+                }
+                throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
             } else {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USER_NOT_FOUND);
