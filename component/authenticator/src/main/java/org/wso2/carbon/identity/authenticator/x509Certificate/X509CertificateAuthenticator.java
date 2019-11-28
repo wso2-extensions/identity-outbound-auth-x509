@@ -37,6 +37,8 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -276,6 +278,11 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
 
         if (isUserCertValid) {
+            try {
+                userName = UserCoreUtil.addDomainToName(userName, X509CertificateUtil.getUserStoreDomainName(userName, authenticationContext));
+            } catch (UserStoreException e) {
+                throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
+            }
             allowUser(userName, claims, cert, authenticationContext);
         } else {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,

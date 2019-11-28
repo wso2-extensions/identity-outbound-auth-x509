@@ -51,6 +51,7 @@ import java.util.Map;
  */
 public class X509CertificateUtil {
     private static final Log log = LogFactory.getLog(X509CertificateUtil.class);
+    private String[] domain;
 
     /**
      * Get certificate from claims.
@@ -368,6 +369,54 @@ public class X509CertificateUtil {
                         X509CertificateConstants.USER_NOT_FOUND);
                 throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
             }
+        }
+    }
+
+    protected static String getUserStoreDomainName(String userIdentifier, AuthenticationContext authenticationContext)
+            throws UserStoreException, AuthenticationFailedException {
+        if (Boolean.valueOf(getX509Parameters().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
+            String[] filteredUsers = X509CertificateUtil.getUserRealm(userIdentifier).getUserStoreManager().listUsers
+                    (MultitenantUtils.getTenantAwareUsername(userIdentifier), X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
+            if (filteredUsers.length == 1) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User exists with the user name: " + userIdentifier);
+                }
+                if (filteredUsers[0].indexOf("/") > 0) {
+                    String[] subjectIdentifierSplits = filteredUsers[0].split("/", 2);
+                    return subjectIdentifierSplits[0];
+                } else {
+                    return null;
+                }
+            } else if (filteredUsers.length > 1) {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USERNAME_CONFLICT);
+                throw new AuthenticationFailedException("Conflicting users with user name: " + userIdentifier);
+            } else if (getX509Parameters().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
+                for (String multiAttributeClaimUri : getX509Parameters()
+                        .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",")) {
+                    String[] usersWithClaim = ((AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userIdentifier)
+                            .getUserStoreManager()).getUserList(multiAttributeClaimUri, userIdentifier, null);
+                    if (usersWithClaim.length == 1) {
+                        if (usersWithClaim[0].indexOf("/") > 0) {
+                            String[] subjectIdentifierSplits = usersWithClaim[0].split("/", 2);
+                            return subjectIdentifierSplits[0];
+                        } else {
+                            return null;
+                        }
+                    } else if (usersWithClaim.length > 1) {
+                        authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                                X509CertificateConstants.USERNAME_CONFLICT);
+                        throw new AuthenticationFailedException("Conflicting users with claim value: " + userIdentifier);
+                    }
+                }
+                throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
+            } else {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USER_NOT_FOUND);
+                throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
+            }
+        } else {
+            return null;
         }
     }
 
