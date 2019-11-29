@@ -280,6 +280,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         if (isUserCertValid) {
             try {
                 userName = UserCoreUtil.addDomainToName(userName, X509CertificateUtil.getUserStoreDomainName(userName, authenticationContext));
+                UserCoreUtil.setDomainInThreadLocal(X509CertificateUtil.getUserStoreDomainName(userName, authenticationContext));
             } catch (UserStoreException e) {
                 throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
             }
