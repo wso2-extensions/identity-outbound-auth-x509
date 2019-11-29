@@ -51,7 +51,6 @@ import java.util.Map;
  */
 public class X509CertificateUtil {
     private static final Log log = LogFactory.getLog(X509CertificateUtil.class);
-    private String[] domain;
 
     /**
      * Get certificate from claims.
