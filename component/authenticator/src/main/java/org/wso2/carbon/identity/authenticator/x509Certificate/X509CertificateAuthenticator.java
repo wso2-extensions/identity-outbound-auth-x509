@@ -540,7 +540,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 if (log.isDebugEnabled()) {
                     log.debug("User exists with the user name: " + userIdentifier);
                 }
-                return getUserStoreDomainNameHelper(filteredUsers[0]);
+                return getDomainNameByUserIdentifier(filteredUsers[0]);
             } else if (filteredUsers.length > 1) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USERNAME_CONFLICT);
@@ -553,7 +553,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 for (String multiAttributeClaimUri : multiAttributeClaimUris) {
                     String[] usersWithClaim = aum.getUserList(multiAttributeClaimUri, userIdentifier, null);
                     if (usersWithClaim.length == 1) {
-                        return getUserStoreDomainNameHelper(usersWithClaim[0]);
+                        return getDomainNameByUserIdentifier(usersWithClaim[0]);
                     } else if (usersWithClaim.length > 1) {
                         authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                                 X509CertificateConstants.USERNAME_CONFLICT);
@@ -571,10 +571,10 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
     }
 
-    private String getUserStoreDomainNameHelper(String user) {
+    private String getDomainNameByUserIdentifier (String userIdentifier) {
 
-        if (user.indexOf("/") > 0) {
-            String[] subjectIdentifierSplits = user.split("/", 2);
+        if (userIdentifier.indexOf("/") > 0) {
+            String[] subjectIdentifierSplits = userIdentifier.split("/", 2);
             return subjectIdentifierSplits[0];
         } else {
             return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
