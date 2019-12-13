@@ -38,6 +38,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -281,8 +282,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
 
         if (isUserCertValid) {
             try {
-                userName = UserCoreUtil.addDomainToName(userName, getUserStoreDomainName(userName, authenticationContext));
-                UserCoreUtil.setDomainInThreadLocal(getUserStoreDomainName(userName, authenticationContext));
+                String userStoreDomain = getUserStoreDomainName(userName, authenticationContext);
+                userName = UserCoreUtil.addDomainToName(userName, userStoreDomain);
+                UserCoreUtil.setDomainInThreadLocal(userStoreDomain);
             } catch (UserStoreException e) {
                 throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
             }
@@ -530,34 +532,26 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private String getUserStoreDomainName(String userIdentifier, AuthenticationContext authenticationContext)
             throws UserStoreException, AuthenticationFailedException {
         if (Boolean.valueOf(getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
-            String[] filteredUsers = X509CertificateUtil.getUserRealm(userIdentifier).getUserStoreManager().listUsers
-                    (MultitenantUtils.getTenantAwareUsername(userIdentifier), X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
+            UserStoreManager um = X509CertificateUtil.getUserRealm(userIdentifier).getUserStoreManager();
+            String[] filteredUsers = um.listUsers(MultitenantUtils.getTenantAwareUsername(userIdentifier),
+                    X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
             if (filteredUsers.length == 1) {
                 if (log.isDebugEnabled()) {
                     log.debug("User exists with the user name: " + userIdentifier);
                 }
-                if (filteredUsers[0].indexOf("/") > 0) {
-                    String[] subjectIdentifierSplits = filteredUsers[0].split("/", 2);
-                    return subjectIdentifierSplits[0];
-                } else {
-                    return null;
-                }
+                return getUserStoreDomainNameHelper(filteredUsers[0]);
             } else if (filteredUsers.length > 1) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USERNAME_CONFLICT);
                 throw new AuthenticationFailedException("Conflicting users with user name: " + userIdentifier);
             } else if (getAuthenticatorConfig().getParameterMap().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
-                for (String multiAttributeClaimUri : getAuthenticatorConfig().getParameterMap()
-                        .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",")) {
+                String[] multiAttributeClaimUris = getAuthenticatorConfig().getParameterMap()
+                        .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",");
+                for (String multiAttributeClaimUri : multiAttributeClaimUris) {
                     String[] usersWithClaim = ((AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userIdentifier)
                             .getUserStoreManager()).getUserList(multiAttributeClaimUri, userIdentifier, null);
                     if (usersWithClaim.length == 1) {
-                        if (usersWithClaim[0].indexOf("/") > 0) {
-                            String[] subjectIdentifierSplits = usersWithClaim[0].split("/", 2);
-                            return subjectIdentifierSplits[0];
-                        } else {
-                            return null;
-                        }
+                        return getUserStoreDomainNameHelper(usersWithClaim[0]);
                     } else if (usersWithClaim.length > 1) {
                         authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                                 X509CertificateConstants.USERNAME_CONFLICT);
@@ -571,9 +565,18 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
             }
         } else {
-            return null;
+            return X509CertificateConstants.PRIMARY;
         }
     }
 
+    private String getUserStoreDomainNameHelper(String user) {
+
+        if (user.indexOf("/") > 0) {
+            String[] subjectIdentifierSplits = user.split("/", 2);
+            return subjectIdentifierSplits[0];
+        } else {
+            return X509CertificateConstants.PRIMARY;
+        }
+    }
 
 }
