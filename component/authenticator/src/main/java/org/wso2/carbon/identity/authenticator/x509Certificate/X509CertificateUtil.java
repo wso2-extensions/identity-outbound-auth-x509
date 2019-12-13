@@ -337,10 +337,12 @@ public class X509CertificateUtil {
                         X509CertificateConstants.USERNAME_CONFLICT);
                 throw new AuthenticationFailedException("Conflicting users with user name: " + userName);
             } else if (getX509Parameters().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
-                for (String multiAttributeClaimUri : getX509Parameters()
-                        .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",")) {
-                    String[] usersWithClaim = ((AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userName)
-                            .getUserStoreManager()).getUserList(multiAttributeClaimUri, userName, null);
+                String[] multiAttributeClaimUris = getX509Parameters().get(X509CertificateConstants.LOGIN_CLAIM_URIS)
+                        .split(",");
+                AbstractUserStoreManager um = (AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userName)
+                        .getUserStoreManager();
+                for (String multiAttributeClaimUri : multiAttributeClaimUris) {
+                    String[] usersWithClaim = um.getUserList(multiAttributeClaimUri, userName, null);
                     if (usersWithClaim.length == 1) {
                         return true;
                     } else if (usersWithClaim.length > 1) {

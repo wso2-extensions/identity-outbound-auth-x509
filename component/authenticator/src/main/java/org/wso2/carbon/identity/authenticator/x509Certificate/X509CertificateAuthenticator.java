@@ -39,6 +39,7 @@ import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -547,9 +548,10 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             } else if (getAuthenticatorConfig().getParameterMap().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
                 String[] multiAttributeClaimUris = getAuthenticatorConfig().getParameterMap()
                         .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",");
+                AbstractUserStoreManager aum = (AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userIdentifier)
+                        .getUserStoreManager();
                 for (String multiAttributeClaimUri : multiAttributeClaimUris) {
-                    String[] usersWithClaim = ((AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userIdentifier)
-                            .getUserStoreManager()).getUserList(multiAttributeClaimUri, userIdentifier, null);
+                    String[] usersWithClaim = aum.getUserList(multiAttributeClaimUri, userIdentifier, null);
                     if (usersWithClaim.length == 1) {
                         return getUserStoreDomainNameHelper(usersWithClaim[0]);
                     } else if (usersWithClaim.length > 1) {
@@ -565,7 +567,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
             }
         } else {
-            return X509CertificateConstants.PRIMARY;
+            return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
         }
     }
 
@@ -575,7 +577,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             String[] subjectIdentifierSplits = user.split("/", 2);
             return subjectIdentifierSplits[0];
         } else {
-            return X509CertificateConstants.PRIMARY;
+            return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
         }
     }
 
