@@ -69,5 +69,6 @@ public class X509CertificateConstants {
             + "subjectRDN found for the given regex";
     public static final int MAX_ITEM_LIMIT_UNLIMITED = -1;
     public static final String SEARCH_ALL_USERSTORES = "SearchAllUserStores";
+    public static final String LOGIN_CLAIM_URIS = "LoginClaimURIs";
 
 }
