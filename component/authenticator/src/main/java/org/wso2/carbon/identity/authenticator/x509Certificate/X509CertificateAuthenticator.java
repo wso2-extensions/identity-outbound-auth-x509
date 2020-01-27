@@ -464,7 +464,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         } else {
             return matchedAlternativeNamesList.toArray(new String[0])[0];
         }
-
     }
 
     /**
