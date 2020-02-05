@@ -71,4 +71,11 @@ public class X509CertificateConstants {
     public static final String SEARCH_ALL_USERSTORES = "SearchAllUserStores";
     public static final String LOGIN_CLAIM_URIS = "LoginClaimURIs";
 
+    public static final String X509_CERTIFICATE_HEADER_NAME = "CertificateHeaderName";
+    public static final String X509_CERTIFICATE_CACHE_NAME = "x509Cache";
+    public static final String X509_ISSUER_CERTIFICATE_TRUST_STORE = "IssuerTrustStoreName";
+    public static final String X509_ISSUER_CERTIFICATE_REQUIRED_OID = "IssuerRequiredOID";
+    public static final String X509_ISSUER_CERTIFICATE_NOT_TRUSTED_ERROR_CODE = "17009";
+    public static final String X509_UNABLE_TO_LOAD_TENANT_ERROR_CODE = "17010";
+    public static final String X509_REQUIRED_POLICY_NOT_FOUND_ERROR_CODE =  "17011";
 }

@@ -19,14 +19,46 @@
 
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.ssl.asn1.ASN1InputStream;
 import org.apache.commons.ssl.asn1.DEREncodable;
+import org.apache.commons.ssl.asn1.DERObject;
 import org.apache.commons.ssl.asn1.DERSequence;
 import org.apache.commons.ssl.asn1.DERTaggedObject;
 import org.apache.commons.ssl.asn1.DERUTF8String;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.LocalApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
@@ -35,34 +67,17 @@ import org.wso2.carbon.identity.application.authentication.framework.exception.A
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
+import org.wso2.carbon.identity.application.common.cache.BaseCache;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Authenticator of X509Certificate.
@@ -74,7 +89,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private Pattern subjectPatternCompiled;
     private String subjectAttributePattern;
     private String alternativeNamePattern;
-
+    private String issuerTrustStoreName;
+    private String requiredPolicyOID;
+    
     private static final Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
 
     public X509CertificateAuthenticator(){
@@ -83,6 +100,11 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 .get(X509CertificateConstants.USER_NAME_REGEX);
         alternativeNamePattern = getAuthenticatorConfig().getParameterMap()
                 .get(X509CertificateConstants.AlTN_NAMES_REGEX);
+        issuerTrustStoreName = getAuthenticatorConfig().getParameterMap()
+                .get(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE);
+        requiredPolicyOID = getAuthenticatorConfig().getParameterMap()
+                .get(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID);
+        
         if (alternativeNamePattern != null) {
             alternativeNamesPatternCompiled = Pattern.compile(alternativeNamePattern);
         }
@@ -148,7 +170,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                                                  HttpServletResponse httpServletResponse,
                                                  AuthenticationContext authenticationContext)
             throws AuthenticationFailedException {
-        Object object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
+        Object object = getCertificateFromRequest(httpServletRequest, authenticationContext);
         if (object != null) {
             X509Certificate[] certificates;
             if (object instanceof X509Certificate[]) {
@@ -161,6 +183,11 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     log.debug("X509 Certificate Checking in servlet is done! ");
                 }
                 X509Certificate cert = certificates[0];
+                
+                validateUserCertificate(cert, authenticationContext);
+                
+                validateIssuerCertificate(cert, authenticationContext);
+                 
                 String certAttributes = String.valueOf(cert.getSubjectX500Principal());
                 Map<ClaimMapping, String> claims;
                 claims = getSubjectAttributes(authenticationContext, certAttributes);
@@ -581,4 +608,90 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
     }
 
+    private Object getCertificateFromRequest(HttpServletRequest httpServletRequest, AuthenticationContext authenticationContext) {
+    	Object object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
+    	if(object == null) {
+    		BaseCache<String, String> cache = new BaseCache<>(X509CertificateConstants.X509_CERTIFICATE_CACHE_NAME);
+    		String certificate = cache.getValueFromCache(authenticationContext.getContextIdentifier());
+    		if(StringUtils.isNotBlank(certificate)) {
+			    byte [] decoded = Base64.getDecoder().decode(certificate.replaceAll("-----BEGIN CERTIFICATE-----", "")
+			    		.replaceAll("-----END CERTIFICATE-----", "").replace("\n", ""));
+    			try(ByteArrayInputStream bais = new ByteArrayInputStream(decoded)) {
+    			    	Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(bais);
+					return new X509Certificate[] {X509Certificate.class.cast(cert)};
+				} catch (CertificateException | IOException e) {
+					log.error(e.getMessage(), e);
+					throw new RuntimeException(e);
+				}
+    		}
+			cache.clear();
+    	}
+    	return object;
+    }
+    
+    private DERObject convertToDERObject(byte[] data) {
+        try(ByteArrayInputStream bais = new ByteArrayInputStream(data); 
+        		ASN1InputStream ans1 = new ASN1InputStream(bais)) {
+			return ans1.readObject();
+		} catch (IOException e) {
+			return null;
+		}
+    }
+    
+    private void validateIssuerCertificate(X509Certificate userCertificate, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
+        if(StringUtils.isNotBlank(issuerTrustStoreName)) {
+            int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            if(StringUtils.isNotBlank(authenticationContext.getTenantDomain())) {
+                tenantId = IdentityTenantUtil.getTenantId(authenticationContext.getTenantDomain());
+            }
+            try {
+                KeyStoreManager ksm = KeyStoreManager.getInstance(tenantId);
+                KeyStore issuersTrustStore;
+                    issuersTrustStore = ksm.getKeyStore(issuerTrustStoreName);
+                String userCertificateIssuerDN = userCertificate.getIssuerDN().getName();
+                Enumeration<String> enumerator = issuersTrustStore.aliases();
+                while(enumerator.hasMoreElements()) {
+                    String alias = enumerator.nextElement();
+                    X509Certificate trustedIssuerCertificate = (X509Certificate) issuersTrustStore.getCertificate(alias);
+                    if (userCertificateIssuerDN.equals(trustedIssuerCertificate.getSubjectDN().getName())) {
+                        try {
+                            trustedIssuerCertificate.checkValidity();                            
+                            userCertificate.verify(trustedIssuerCertificate.getPublicKey());
+                            return;
+                        } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+                            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                                    X509CertificateConstants.X509_ISSUER_CERTIFICATE_NOT_TRUSTED_ERROR_CODE);
+                            throw new AuthenticationFailedException("Issuer certificate is not valid ");
+                        }
+                    }
+                }
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.X509_ISSUER_CERTIFICATE_NOT_TRUSTED_ERROR_CODE);
+                throw new AuthenticationFailedException(" Unable to find issuer certificate");
+            } catch (Exception e1) {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.X509_ISSUER_CERTIFICATE_NOT_TRUSTED_ERROR_CODE);
+                throw new AuthenticationFailedException(" Unable to validate issuer certificate");
+            }
+        }
+    }
+
+    private void validateUserCertificate(X509Certificate userCertificate, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
+    	if(StringUtils.isNotBlank(requiredPolicyOID)) {
+    		for(String oid : requiredPolicyOID.split(";")) {
+    			byte[] derExtension = userCertificate.getExtensionValue(oid);
+    			if(derExtension == null) {
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                            X509CertificateConstants.X509_REQUIRED_POLICY_NOT_FOUND_ERROR_CODE);
+                    throw new AuthenticationFailedException("Unable to find required  oid " + oid);
+    			}
+    			DERObject der = convertToDERObject(derExtension);
+    			if(der == null) {
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                            X509CertificateConstants.X509_REQUIRED_POLICY_NOT_FOUND_ERROR_CODE);
+                    throw new AuthenticationFailedException("Unable to decode required  oid " + oid);
+    			}
+    		}
+    	}
+    }
 }
