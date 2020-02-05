@@ -60,36 +60,66 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 @PowerMockIgnore({ "javax.xml.*" })
 public class X509CertificateAuthenticatorExtensionTest {
 
-    private static final String CERT_ARUBAPEC_SPA_NG_CA_2 = "MIIE+DCCA+CgAwIBAgIQWHiRc5ymTq1oGnRZ1d4EWjANBgkqhkiG9w0BAQUFADBs\n"
-            + "MQswCQYDVQQGEwJJVDEYMBYGA1UECgwPQXJ1YmFQRUMgUy5wLkEuMSEwHwYDVQQL\n" + "DBhDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eUIxIDAeBgNVBAMMF0FydWJhUEVDIFMu\n"
-            + "cC5BLiBORyBDQSAyMB4XDTA4MDgwNTAwMDAwMFoXDTI4MDgwNDIzNTk1OVowbDEL\n" + "MAkGA1UEBhMCSVQxGDAWBgNVBAoMD0FydWJhUEVDIFMucC5BLjEhMB8GA1UECwwY\n"
-            + "Q2VydGlmaWNhdGlvbiBBdXRob3JpdHlCMSAwHgYDVQQDDBdBcnViYVBFQyBTLnAu\n" + "QS4gTkcgQ0EgMjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO/HEcx0\n"
-            + "kiFntBxRIySwU/wbb7384bnNwLjcOWqGKh/PFyjymeUiIMF3RgbvIg5O+B5V36CO\n" + "Eq6FsvhW8v2yI6JJ6MMMH3EdDAV35Y6mPOnXetsn3+mtkMi+u4C3fZ8f3UsmOL+S\n"
-            + "7dxtvOqaax7FSURvNvPeTjQ/b8PKDgdLzR/Zn8bBH4IXCFsvPAHoQP9awWrzojwP\n" + "whWwHB5tn5sTHooPKzBULtRede4xSTp6HkCD3aqsj5Ve8QkQSIJT78I+NmL8AeJM\n"
-            + "KC6ojvT50Xb42mDdPKccPkTP1zCX/+eYA4IOsx7nsrHkjdAVAjz5zLqFwzxGbtMN\n" + "o+LmUhfpZyYwxRkCAwEAAaOCAZQwggGQMBIGA1UdEwEB/wQIMAYBAf8CAQAwagYD\n"
-            + "VR0fBGMwYTBfoF2gW4ZZaHR0cDovL29uc2l0ZWNybC5hcnViYXBlYy50cnVzdGl0\n" + "YWxpYS5pdC9BcnViYVBFQ1NwQUNlcnRpZmljYXRpb25BdXRob3JpdHlCL0xhdGVz\n"
-            + "dENSTC5jcmwwKgYDVR0SBCMwIaQfMB0xGzAZBgNVBAMTEkdPVlZTUC1DMS0yMDQ4\n" + "LTEtODA/BggrBgEFBQcBAQQzMDEwLwYIKwYBBQUHMAGGI2h0dHA6Ly9vY3NwLmFy\n"
-            + "dWJhcGVjLnRydXN0aXRhbGlhLml0MEYGA1UdIAQ/MD0wOwYKKwYBBAGB6C0BATAt\n" + "MCsGCCsGAQUFBwIBFh9odHRwczovL2NhLmFydWJhcGVjLml0L2Nwcy5odG1sMA4G\n"
-            + "A1UdDwEB/wQEAwIBBjAqBgNVHREEIzAhpB8wHTEbMBkGA1UEAxMSR09WVlNQLUMx\n" + "LTIwNDgtMS04MB0GA1UdDgQWBBTy/2NAHBFC/czf8Vn2buiZhzFHeTANBgkqhkiG\n"
-            + "9w0BAQUFAAOCAQEAFMS2EmV38HiH+QsIOdtFelRlRuCySjX/q2qh6eXsbxxJhXvI\n" + "+WQ8uLCFk+XjR8PMZHw9JAtk/YOYsZDhcJzBYb/WZTmxb5Kdb9a66G6tt3H3GpEh\n"
-            + "a4sPsTEUhIhXeEA13Bna7/tFbMQ+I072297w3hBOFe9pgLNe8hkU3bSDBmq3EoB/\n" + "U2DGCpG/al/rWr/xuR+WzrMyalfAEieX2zGas7exnSoYUVguU+RsZPA6twqpvuJq\n"
-            + "j51D5Qxhqdws1q08xiVloLwPtYRoaBpOK1OO+EbheaRYYfubK/ziIgX/gjWv9mhn\n" + "xtAJgqomBNWPrQrvnwm7htuBClgQpKuL8vYx6g==\n";
+    private static final String CERT_ARUBAPEC_SPA_NG_CA_2 = 
+            "MIIE+DCCA+CgAwIBAgIQWHiRc5ymTq1oGnRZ1d4EWjANBgkqhkiG9w0BAQUFADBs\n"
+            + "MQswCQYDVQQGEwJJVDEYMBYGA1UECgwPQXJ1YmFQRUMgUy5wLkEuMSEwHwYDVQQL\n" 
+            + "DBhDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eUIxIDAeBgNVBAMMF0FydWJhUEVDIFMu\n"
+            + "cC5BLiBORyBDQSAyMB4XDTA4MDgwNTAwMDAwMFoXDTI4MDgwNDIzNTk1OVowbDEL\n" 
+            + "MAkGA1UEBhMCSVQxGDAWBgNVBAoMD0FydWJhUEVDIFMucC5BLjEhMB8GA1UECwwY\n"
+            + "Q2VydGlmaWNhdGlvbiBBdXRob3JpdHlCMSAwHgYDVQQDDBdBcnViYVBFQyBTLnAu\n" 
+            + "QS4gTkcgQ0EgMjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO/HEcx0\n"
+            + "kiFntBxRIySwU/wbb7384bnNwLjcOWqGKh/PFyjymeUiIMF3RgbvIg5O+B5V36CO\n" 
+            + "Eq6FsvhW8v2yI6JJ6MMMH3EdDAV35Y6mPOnXetsn3+mtkMi+u4C3fZ8f3UsmOL+S\n"
+            + "7dxtvOqaax7FSURvNvPeTjQ/b8PKDgdLzR/Zn8bBH4IXCFsvPAHoQP9awWrzojwP\n" 
+            + "whWwHB5tn5sTHooPKzBULtRede4xSTp6HkCD3aqsj5Ve8QkQSIJT78I+NmL8AeJM\n"
+            + "KC6ojvT50Xb42mDdPKccPkTP1zCX/+eYA4IOsx7nsrHkjdAVAjz5zLqFwzxGbtMN\n" 
+            + "o+LmUhfpZyYwxRkCAwEAAaOCAZQwggGQMBIGA1UdEwEB/wQIMAYBAf8CAQAwagYD\n"
+            + "VR0fBGMwYTBfoF2gW4ZZaHR0cDovL29uc2l0ZWNybC5hcnViYXBlYy50cnVzdGl0\n" 
+            + "YWxpYS5pdC9BcnViYVBFQ1NwQUNlcnRpZmljYXRpb25BdXRob3JpdHlCL0xhdGVz\n"
+            + "dENSTC5jcmwwKgYDVR0SBCMwIaQfMB0xGzAZBgNVBAMTEkdPVlZTUC1DMS0yMDQ4\n" 
+            + "LTEtODA/BggrBgEFBQcBAQQzMDEwLwYIKwYBBQUHMAGGI2h0dHA6Ly9vY3NwLmFy\n"
+            + "dWJhcGVjLnRydXN0aXRhbGlhLml0MEYGA1UdIAQ/MD0wOwYKKwYBBAGB6C0BATAt\n" 
+            + "MCsGCCsGAQUFBwIBFh9odHRwczovL2NhLmFydWJhcGVjLml0L2Nwcy5odG1sMA4G\n"
+            + "A1UdDwEB/wQEAwIBBjAqBgNVHREEIzAhpB8wHTEbMBkGA1UEAxMSR09WVlNQLUMx\n" 
+            + "LTIwNDgtMS04MB0GA1UdDgQWBBTy/2NAHBFC/czf8Vn2buiZhzFHeTANBgkqhkiG\n"
+            + "9w0BAQUFAAOCAQEAFMS2EmV38HiH+QsIOdtFelRlRuCySjX/q2qh6eXsbxxJhXvI\n" 
+            + "+WQ8uLCFk+XjR8PMZHw9JAtk/YOYsZDhcJzBYb/WZTmxb5Kdb9a66G6tt3H3GpEh\n"
+            + "a4sPsTEUhIhXeEA13Bna7/tFbMQ+I072297w3hBOFe9pgLNe8hkU3bSDBmq3EoB/\n" 
+            + "U2DGCpG/al/rWr/xuR+WzrMyalfAEieX2zGas7exnSoYUVguU+RsZPA6twqpvuJq\n"
+            + "j51D5Qxhqdws1q08xiVloLwPtYRoaBpOK1OO+EbheaRYYfubK/ziIgX/gjWv9mhn\n" 
+            + "xtAJgqomBNWPrQrvnwm7htuBClgQpKuL8vYx6g==\n";
 
-    private static final String CERT_CNS = "-----BEGIN CERTIFICATE-----\n" + "MIIFRzCCBC+gAwIBAgIQZEBl5/blMmfHc1RilpORiDANBgkqhkiG9w0BAQUFADBs\n"
-            + "MQswCQYDVQQGEwJJVDEYMBYGA1UECgwPQXJ1YmFQRUMgUy5wLkEuMSEwHwYDVQQL\n" + "DBhDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eUIxIDAeBgNVBAMMF0FydWJhUEVDIFMu\n"
-            + "cC5BLiBORyBDQSAyMB4XDTE5MDYwMzAwMDAwMFoXDTIyMDYwMjIzNTk1OVowgcox\n" + "RzBFBgNVBAMMPkZSU0dMQzcyRDA1SDUwMUovNzQyMDA4MDIwMDI4MDg2NC44dmF0\n"
-            + "eG1lSTR1UlJtaEtONzNVdGo4K3hWWG89MRwwGgYDVQQFExNJVDpGUlNHTEM3MkQw\n" + "NUg1MDFKMREwDwYDVQQqDAhHSUFOTFVDQTEOMAwGA1UEBAwFRkFSRVMxHDAaBgNV\n"
-            + "BAoME0NhbWVyYSBkaSBDb21tZXJjaW8xEzARBgNVBAsMCkNDSUFBIFJvbWExCzAJ\n" + "BgNVBAYTAklUMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUhehToLJN3KDF\n"
-            + "P+L9xkyCvUvwnawrbE/2M881EBE64Y5F42LHu6FyrnGDLqml0SQz9Ei0J8OYe58C\n" + "SKMbBvW29faXEvDHsPINJL7d4hbcbHHHfb+lJDSB+c+5DOZGvNvTVApGVEcHn2if\n"
-            + "Qa5TSpdbDjY2EBldWVffrmn7dWiQtQIDAQABo4ICCDCCAgQwgfcGA1UdIASB7zCB\n" + "7DCBqwYFK0wQAgEwgaEwgZ4GCCsGAQUFBwICMIGRGoGOSWRlbnRpZmllcyBYLjUw\n"
-            + "OSBhdXRoZW50aWNhdGlvbiBjZXJ0aWZpY2F0ZXMgaXNzdWVkIGZvciB0aGUgaXRh\n" + "bGlhbiBOYXRpb25hbCBTZXJ2aWNlIENhcmQgKENOUykgcHJvamVjdCBpbiBhY2Nv\n"
-            + "cmRpbmcgdG8gdGhlIGl0YWxpYW4gcmVndWxhdGlvbjA8BgsrBgEEAYHoLQEBAjAt\n" + "MCsGCCsGAQUFBwIBFh9odHRwczovL2NhLmFydWJhcGVjLml0L2Nwcy5odG1sMFgG\n"
-            + "A1UdHwRRME8wTaBLoEmGR2h0dHA6Ly9jcmwuYXJ1YmFwZWMuaXQvQXJ1YmFQRUNT\n" + "cEFDZXJ0aWZpY2F0aW9uQXV0aG9yaXR5Qi9MYXRlc3RDUkwuY3JsMA4GA1UdDwEB\n"
-            + "/wQEAwIFoDAfBgNVHSMEGDAWgBTy/2NAHBFC/czf8Vn2buiZhzFHeTAdBgNVHQ4E\n" + "FgQUYyMm97v1zBltmXlK3gEZHojPWAQwMwYIKwYBBQUHAQEEJzAlMCMGCCsGAQUF\n"
-            + "BzABhhdodHRwOi8vb2NzcC5hcnViYXBlYy5pdDApBgNVHSUEIjAgBggrBgEFBQcD\n" + "AgYKKwYBBAGCNxQCAgYIKwYBBQUHAwQwDQYJKoZIhvcNAQEFBQADggEBAOn1Qp/k\n"
-            + "9mL5DXyiapyIQZTV2TXXnzl9xB3VAN2MheqZlXVclEPHk9OSY4onfqAvyJRoSwos\n" + "8F3c/jtDQ/atmUkQ430hXDxavw99Nw4cewgPqo4yEFTbXsXDe5jIl6S3uh9OF5Oq\n"
-            + "rQoDLhp6zUYdEw/u7mFtGs9fO239y4jmChfHibscxugc7a8gaDnImtwRT6Vh65xA\n" + "Avi/KoKxZsgJ7arV9V2wGt+jjIC2VVbINddsz+I4G2zInLhldfZDqpBmiBaqH7i+\n"
-            + "qGKpM6fFilhE5K6oIiTKdNZh5kuoS+HPOKXcyP1lnf6drAA6xEShLDtP3NzIK0hr\n" + "pDgWlq3mC8Ky7/I=\n" + "-----END CERTIFICATE-----";
+    private static final String CERT_CNS = "-----BEGIN CERTIFICATE-----\n" 
+            + "MIIFRzCCBC+gAwIBAgIQZEBl5/blMmfHc1RilpORiDANBgkqhkiG9w0BAQUFADBs\n"
+            + "MQswCQYDVQQGEwJJVDEYMBYGA1UECgwPQXJ1YmFQRUMgUy5wLkEuMSEwHwYDVQQL\n" 
+            + "DBhDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eUIxIDAeBgNVBAMMF0FydWJhUEVDIFMu\n"
+            + "cC5BLiBORyBDQSAyMB4XDTE5MDYwMzAwMDAwMFoXDTIyMDYwMjIzNTk1OVowgcox\n" 
+            + "RzBFBgNVBAMMPkZSU0dMQzcyRDA1SDUwMUovNzQyMDA4MDIwMDI4MDg2NC44dmF0\n"
+            + "eG1lSTR1UlJtaEtONzNVdGo4K3hWWG89MRwwGgYDVQQFExNJVDpGUlNHTEM3MkQw\n" 
+            + "NUg1MDFKMREwDwYDVQQqDAhHSUFOTFVDQTEOMAwGA1UEBAwFRkFSRVMxHDAaBgNV\n"
+            + "BAoME0NhbWVyYSBkaSBDb21tZXJjaW8xEzARBgNVBAsMCkNDSUFBIFJvbWExCzAJ\n" 
+            + "BgNVBAYTAklUMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDUhehToLJN3KDF\n"
+            + "P+L9xkyCvUvwnawrbE/2M881EBE64Y5F42LHu6FyrnGDLqml0SQz9Ei0J8OYe58C\n" 
+            + "SKMbBvW29faXEvDHsPINJL7d4hbcbHHHfb+lJDSB+c+5DOZGvNvTVApGVEcHn2if\n"
+            + "Qa5TSpdbDjY2EBldWVffrmn7dWiQtQIDAQABo4ICCDCCAgQwgfcGA1UdIASB7zCB\n" 
+            + "7DCBqwYFK0wQAgEwgaEwgZ4GCCsGAQUFBwICMIGRGoGOSWRlbnRpZmllcyBYLjUw\n"
+            + "OSBhdXRoZW50aWNhdGlvbiBjZXJ0aWZpY2F0ZXMgaXNzdWVkIGZvciB0aGUgaXRh\n" 
+            + "bGlhbiBOYXRpb25hbCBTZXJ2aWNlIENhcmQgKENOUykgcHJvamVjdCBpbiBhY2Nv\n"
+            + "cmRpbmcgdG8gdGhlIGl0YWxpYW4gcmVndWxhdGlvbjA8BgsrBgEEAYHoLQEBAjAt\n" 
+            + "MCsGCCsGAQUFBwIBFh9odHRwczovL2NhLmFydWJhcGVjLml0L2Nwcy5odG1sMFgG\n"
+            + "A1UdHwRRME8wTaBLoEmGR2h0dHA6Ly9jcmwuYXJ1YmFwZWMuaXQvQXJ1YmFQRUNT\n" 
+            + "cEFDZXJ0aWZpY2F0aW9uQXV0aG9yaXR5Qi9MYXRlc3RDUkwuY3JsMA4GA1UdDwEB\n"
+            + "/wQEAwIFoDAfBgNVHSMEGDAWgBTy/2NAHBFC/czf8Vn2buiZhzFHeTAdBgNVHQ4E\n" 
+            + "FgQUYyMm97v1zBltmXlK3gEZHojPWAQwMwYIKwYBBQUHAQEEJzAlMCMGCCsGAQUF\n"
+            + "BzABhhdodHRwOi8vb2NzcC5hcnViYXBlYy5pdDApBgNVHSUEIjAgBggrBgEFBQcD\n" 
+            + "AgYKKwYBBAGCNxQCAgYIKwYBBQUHAwQwDQYJKoZIhvcNAQEFBQADggEBAOn1Qp/k\n"
+            + "9mL5DXyiapyIQZTV2TXXnzl9xB3VAN2MheqZlXVclEPHk9OSY4onfqAvyJRoSwos\n" 
+            + "8F3c/jtDQ/atmUkQ430hXDxavw99Nw4cewgPqo4yEFTbXsXDe5jIl6S3uh9OF5Oq\n"
+            + "rQoDLhp6zUYdEw/u7mFtGs9fO239y4jmChfHibscxugc7a8gaDnImtwRT6Vh65xA\n" 
+            + "Avi/KoKxZsgJ7arV9V2wGt+jjIC2VVbINddsz+I4G2zInLhldfZDqpBmiBaqH7i+\n"
+            + "qGKpM6fFilhE5K6oIiTKdNZh5kuoS+HPOKXcyP1lnf6drAA6xEShLDtP3NzIK0hr\n" 
+            + "pDgWlq3mC8Ky7/I=\n" 
+            + "-----END CERTIFICATE-----";
 
     private AuthenticatorConfig authenticatorConfig;
 
@@ -121,37 +151,44 @@ public class X509CertificateAuthenticatorExtensionTest {
         sequenceConfig.setStepMap(stepMap);
 
         Map<String, String> map = new HashMap<>();
-        map.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map.put(X509CertificateConstants.USERNAME, "CN");
 
         Map<String, String> map2 = new HashMap<>();
-        map2.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map2.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map2.put(X509CertificateConstants.USERNAME, "CN");
         map2.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37");
 
         Map<String, String> map3 = new HashMap<>();
-        map3.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map3.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map3.put(X509CertificateConstants.USERNAME, "CN");
         map3.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "1.1.1.1");
 
         Map<String, String> map4 = new HashMap<>();
-        map4.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map4.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map4.put(X509CertificateConstants.USERNAME, "CN");
         map4.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;1.1.1.1");
 
         Map<String, String> map5 = new HashMap<>();
-        map5.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map5.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map5.put(X509CertificateConstants.USERNAME, "CN");
         map5.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32");
 
         Map<String, String> map6 = new HashMap<>();
-        map6.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map6.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map6.put(X509CertificateConstants.USERNAME, "CN");
         map6.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map6.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "Fake trust store");
 
         Map<String, String> map7 = new HashMap<>();
-        map7.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map7.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map7.put(X509CertificateConstants.USERNAME, "CN");
         map7.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map7.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "issuer.jks");
@@ -159,7 +196,8 @@ public class X509CertificateAuthenticatorExtensionTest {
         emptyKeystore.load(null, "changeme".toCharArray());
 
         Map<String, String> map8 = new HashMap<>();
-        map8.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
+        map8.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
+                X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map8.put(X509CertificateConstants.USERNAME, "CN");
         map8.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map8.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "issuer.jks");
