@@ -199,8 +199,10 @@ public class X509CertificateAuthenticatorExtensionTest {
         map8.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map8.put(X509CertificateConstants.USERNAME, "CN");
+        map8.put(X509CertificateConstants.USER_NAME_REGEX, "^([A-Z0-9]{16})/.*$");
         map8.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map8.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "issuer.jks");
+
         KeyStore arubaKeystore = KeyStore.getInstance("JKS");
         arubaKeystore.load(null, "changeme".toCharArray());
         arubaKeystore.setCertificateEntry("aruba", factory.generateCertificate(
@@ -271,5 +273,4 @@ public class X509CertificateAuthenticatorExtensionTest {
             spy.process(mockRequest, mockResponse, authenticationContext);
         }
 	}
-
 }

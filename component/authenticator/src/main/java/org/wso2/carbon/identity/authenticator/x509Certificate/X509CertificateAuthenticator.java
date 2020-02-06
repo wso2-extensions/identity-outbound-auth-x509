@@ -551,9 +551,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
-
         while (matcher.find()) {
-            matches.add(matcher.group());
+            if(matcher.groupCount() == 1) {
+                matches.add(matcher.group(1));
+            } else {
+                matches.add(matcher.group());
+            }
         }
     }
 
