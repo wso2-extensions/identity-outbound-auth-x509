@@ -103,7 +103,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         issuerTrustStoreName = getAuthenticatorConfig().getParameterMap()
                 .get(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE);
         requiredPolicyOID = getAuthenticatorConfig().getParameterMap()
-                .get(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID);
+                .get(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID);
         
         if (alternativeNamePattern != null) {
             alternativeNamesPatternCompiled = Pattern.compile(alternativeNamePattern);
