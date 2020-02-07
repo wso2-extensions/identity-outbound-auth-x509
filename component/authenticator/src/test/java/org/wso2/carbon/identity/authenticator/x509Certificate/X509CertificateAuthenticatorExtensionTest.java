@@ -159,38 +159,38 @@ public class X509CertificateAuthenticatorExtensionTest {
         map2.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map2.put(X509CertificateConstants.USERNAME, "CN");
-        map2.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37");
+        map2.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "2.5.29.37");
 
         Map<String, String> map3 = new HashMap<>();
         map3.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map3.put(X509CertificateConstants.USERNAME, "CN");
-        map3.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "1.1.1.1");
+        map3.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "1.1.1.1");
 
         Map<String, String> map4 = new HashMap<>();
         map4.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map4.put(X509CertificateConstants.USERNAME, "CN");
-        map4.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;1.1.1.1");
+        map4.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;1.1.1.1");
 
         Map<String, String> map5 = new HashMap<>();
         map5.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map5.put(X509CertificateConstants.USERNAME, "CN");
-        map5.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32");
+        map5.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32");
 
         Map<String, String> map6 = new HashMap<>();
         map6.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map6.put(X509CertificateConstants.USERNAME, "CN");
-        map6.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
+        map6.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map6.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "Fake trust store");
 
         Map<String, String> map7 = new HashMap<>();
         map7.put(X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME, 
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map7.put(X509CertificateConstants.USERNAME, "CN");
-        map7.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
+        map7.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map7.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "issuer.jks");
         KeyStore emptyKeystore = KeyStore.getInstance("JKS");
         emptyKeystore.load(null, "changeme".toCharArray());
@@ -200,7 +200,7 @@ public class X509CertificateAuthenticatorExtensionTest {
                 X509CertificateConstants.X509_CERTIFICATE_HEADER_NAME);
         map8.put(X509CertificateConstants.USERNAME, "CN");
         map8.put(X509CertificateConstants.USER_NAME_REGEX, "^([A-Z0-9]{16})/.*$");
-        map8.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
+        map8.put(X509CertificateConstants.X509_USER_CERTIFICATE_REQUIRED_OID, "2.5.29.37;2.5.29.32;2.5.29.35;2.5.29.32");
         map8.put(X509CertificateConstants.X509_ISSUER_CERTIFICATE_TRUST_STORE, "issuer.jks");
 
         KeyStore arubaKeystore = KeyStore.getInstance("JKS");
