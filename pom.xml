@@ -36,7 +36,6 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>component/authentication-endpoint</module>
                 <module>component/authenticator</module>
                 <module>feature</module>
             </modules>
