@@ -424,7 +424,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  x509 certificate.
      * @param authenticationContext authenticationContext
      */
-    private String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
+    protected String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext)
+             throws AuthenticationFailedException  {
 
         Set<String> matchedAlternativeNamesList = new HashSet<>();
         try {
@@ -551,7 +552,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 AbstractUserStoreManager aum = (AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userIdentifier)
                         .getUserStoreManager();
                 for (String multiAttributeClaimUri : multiAttributeClaimUris) {
-                    String[] usersWithClaim = aum.getUserList(multiAttributeClaimUri, userIdentifier, null);
+                    String[] usersWithClaim = aum.getUserList(multiAttributeClaimUri,
+                            MultitenantUtils.getTenantAwareUsername(userIdentifier), null);
                     if (usersWithClaim.length == 1) {
                         return getDomainNameByUserIdentifier(usersWithClaim[0]);
                     } else if (usersWithClaim.length > 1) {

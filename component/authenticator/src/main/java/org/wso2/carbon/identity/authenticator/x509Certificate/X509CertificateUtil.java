@@ -342,7 +342,8 @@ public class X509CertificateUtil {
                 AbstractUserStoreManager um = (AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userName)
                         .getUserStoreManager();
                 for (String multiAttributeClaimUri : multiAttributeClaimUris) {
-                    String[] usersWithClaim = um.getUserList(multiAttributeClaimUri, userName, null);
+                    String[] usersWithClaim = um.getUserList(multiAttributeClaimUri,
+                            MultitenantUtils.getTenantAwareUsername(userName), null);
                     if (usersWithClaim.length == 1) {
                         return true;
                     } else if (usersWithClaim.length > 1) {
