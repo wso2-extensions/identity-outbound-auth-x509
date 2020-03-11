@@ -425,7 +425,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param authenticationContext authenticationContext
      */
     protected String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext)
-     throws AuthenticationFailedException {
+             throws AuthenticationFailedException  {
 
         Set<String> matchedAlternativeNamesList = new HashSet<>();
         try {
