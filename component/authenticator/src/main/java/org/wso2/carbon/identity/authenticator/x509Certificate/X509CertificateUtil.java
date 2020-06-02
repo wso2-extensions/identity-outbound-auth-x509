@@ -376,16 +376,25 @@ public class X509CertificateUtil {
         }
     }
 
+    /**
+     * Check whether user account is locke or not.
+     *
+     * @param user Authenticated user.
+     * @return boolean account locked or not.
+     */
     public static boolean isAccountLock(AuthenticatedUser user) {
 
-        boolean accountLock;
-        try {
-            accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(user
-                    .getUserName(), user.getTenantDomain());
-        } catch (AccountLockServiceException e) {
-            accountLock = false;
+        boolean accountLock = false;
+        if (user != null) {
+            try {
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(user
+                        .getUserName(), user.getTenantDomain());
+            } catch (AccountLockServiceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while calling the account lock service for user " + user.getUserName(), e);
+                }
+            }
         }
-
         return accountLock;
     }
 
