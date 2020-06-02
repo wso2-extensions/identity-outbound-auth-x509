@@ -28,7 +28,9 @@ import org.wso2.carbon.identity.application.authentication.framework.config.buil
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationException;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManager;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManagerImpl;
@@ -372,6 +374,28 @@ public class X509CertificateUtil {
                 throw new AuthenticationFailedException(" Unable to find X509 Certificate's user in user store. ");
             }
         }
+    }
+
+    /**
+     * Check whether user account is locke or not.
+     *
+     * @param user Authenticated user.
+     * @return boolean account locked or not.
+     */
+    public static boolean isAccountLock(AuthenticatedUser user) {
+
+        boolean accountLock = false;
+        if (user != null) {
+            try {
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(user
+                        .getUserName(), user.getTenantDomain());
+            } catch (AccountLockServiceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while calling the account lock service for user " + user.getUserName(), e);
+                }
+            }
+        }
+        return accountLock;
     }
 
 }

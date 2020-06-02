@@ -44,16 +44,10 @@ import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,6 +57,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateUtil.isAccountLock;
 
 /**
  * Authenticator of X509Certificate.
@@ -281,7 +282,14 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throw new AuthenticationFailedException("Error in validating the user certificate", e);
         }
 
-        if (isUserCertValid) {
+        // Check whether user account is locked or not.
+        if (isAccountLock(getUsername(authenticationContext))) {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.USER_ACCOUNT_LOCKED);
+            throw new AuthenticationFailedException("Account is locked for user: " + userName);
+        }
+
+        if (isUserCertValid ) {
             try {
                 String userStoreDomain = getUserStoreDomainName(userName, authenticationContext);
                 userName = UserCoreUtil.addDomainToName(userName, userStoreDomain);
