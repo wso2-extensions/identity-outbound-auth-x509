@@ -72,6 +72,8 @@
                 } else if (errorCode.equalsIgnoreCase("17008")) {
                     errorMessage = resourceBundle
                             .getString("x509certificateauthenticator.alternativenames.notfound.code.17008.error.message");
+                } else if (errorCode.equalsIgnoreCase("17002")) {
+                    errorMessage = resourceBundle.getString("user.account.locked");
                 }
             }
         }
