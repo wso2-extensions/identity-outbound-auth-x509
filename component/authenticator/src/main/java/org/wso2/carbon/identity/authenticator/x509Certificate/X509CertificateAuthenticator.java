@@ -266,8 +266,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  X509 certificate
      * @throws AuthenticationFailedException
      */
-    private void addOrValidateCertificate(AuthenticatedUser authenticatedUser, String userName,
-                                          AuthenticationContext authenticationContext, byte[] data,
+    private void addOrValidateCertificate(String userName, AuthenticationContext authenticationContext, byte[] data,
                                           Map<ClaimMapping, String> claims, X509Certificate cert) throws
             AuthenticationFailedException {
 
@@ -284,7 +283,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
 
         // Check whether user account is locked or not.
-        if (isAccountLock(authenticatedUser)) {
+        if (isAccountLock(getUsername(authenticationContext))) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.USER_ACCOUNT_LOCKED);
             throw new AuthenticationFailedException("Account is locked for user: " + userName);
@@ -519,7 +518,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             }
             String authenticatedUserName = authenticatedUser.getAuthenticatedSubjectIdentifier();
             if (authenticatedUserName.equals(subject)) {
-                addOrValidateCertificate(authenticatedUser, subject, authenticationContext, data, claims, cert);
+                addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
             } else {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USERNAME_CONFLICT);
@@ -527,7 +526,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                         "Couldn't find X509 certificate to this authenticated user: " + authenticatedUserName);
             }
         } else {
-            addOrValidateCertificate(authenticatedUser, subject, authenticationContext, data, claims, cert);
+            addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
         }
     }
 
