@@ -36,7 +36,34 @@
             <artifactId>org.wso2.carbon.extension.identity.x509Certificate.validation</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.event.handler.accountlock</groupId>
+            <artifactId>org.wso2.carbon.identity.handler.event.account.lock</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <id>wso2-nexus</id>
@@ -67,7 +94,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>3.2.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
