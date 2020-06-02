@@ -30,6 +30,7 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 
@@ -366,6 +367,8 @@ public class X509CertificateAuthenticatorTest {
                 .validateCertificate(Matchers.anyString(), Matchers.any(AuthenticationContext.class), any(byte[].class),
                         Matchers.anyBoolean())).thenReturn(true);
         mockStatic(IdentityUtil.class);
+        when(X509CertificateUtil
+                .isAccountLock(Matchers.any(AuthenticatedUser.class))).thenReturn(false);
         when(IdentityUtil.getPrimaryDomainName()).thenReturn("PRIMARY");
         if (exceptionShouldThrown) {
             try {
