@@ -63,6 +63,7 @@ import javax.naming.ldap.Rdn;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateUtil.isAccountDisabled;
 import static org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateUtil.isAccountLock;
 
 /**
@@ -287,6 +288,13 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.USER_ACCOUNT_LOCKED);
             throw new AuthenticationFailedException("Account is locked for user: " + userName);
+        }
+
+        // Check whether user account is disable or not.
+        if (isAccountDisabled(getUsername(authenticationContext))) {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.USER_ACCOUNT_DISABLED);
+            throw new AuthenticationFailedException("Account is disabled for user: " + userName);
         }
 
         if (isUserCertValid ) {
