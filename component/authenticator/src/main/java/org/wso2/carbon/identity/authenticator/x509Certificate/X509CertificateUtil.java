@@ -384,8 +384,9 @@ public class X509CertificateUtil {
      *
      * @param user Authenticated user.
      * @return boolean account locked or not.
+     * @throws AccountLockServiceException
      */
-    public static boolean isAccountLock(AuthenticatedUser user) {
+    public static boolean isAccountLock(AuthenticatedUser user) throws AccountLockServiceException {
 
         boolean accountLock = false;
         if (user != null) {
@@ -396,6 +397,7 @@ public class X509CertificateUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Error while calling the account lock service for user " + user.getUserName(), e);
                 }
+                throw e;
             }
         }
         return accountLock;
@@ -406,8 +408,9 @@ public class X509CertificateUtil {
      *
      * @param user Authenticated user.
      * @return boolean account disabled or not.
+     * @throws UserStoreException
      */
-    public static boolean isAccountDisabled(AuthenticatedUser user) {
+    public static boolean isAccountDisabled(AuthenticatedUser user) throws UserStoreException {
 
         boolean accountDisable = false;
         if (user != null) {
@@ -426,6 +429,7 @@ public class X509CertificateUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Error while checking account disable for user " + user.getUserName(), e);
                 }
+                throw e;
             }
         }
         return accountDisable;

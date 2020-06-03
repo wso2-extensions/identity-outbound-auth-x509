@@ -37,6 +37,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -283,18 +284,23 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throw new AuthenticationFailedException("Error in validating the user certificate", e);
         }
 
-        // Check whether user account is locked or not.
-        if (isAccountLock(getUsername(authenticationContext))) {
-            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                    X509CertificateConstants.USER_ACCOUNT_LOCKED);
-            throw new AuthenticationFailedException("Account is locked for user: " + userName);
-        }
+        try {
+            // Check whether user account is locked or not.
+            if (isAccountLock(getUsername(authenticationContext))) {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USER_ACCOUNT_LOCKED);
+                throw new AuthenticationFailedException("Account is locked for user: " + userName);
+            }
 
-        // Check whether user account is disable or not.
-        if (isAccountDisabled(getUsername(authenticationContext))) {
-            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                    X509CertificateConstants.USER_ACCOUNT_DISABLED);
-            throw new AuthenticationFailedException("Account is disabled for user: " + userName);
+            // Check whether user account is disable or not.
+            if (isAccountDisabled(getUsername(authenticationContext))) {
+                authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                        X509CertificateConstants.USER_ACCOUNT_DISABLED);
+                throw new AuthenticationFailedException("Account is disabled for user: " + userName);
+            }
+        } catch (UserStoreException | AccountLockServiceException e) {
+            throw new AuthenticationFailedException("User account lock/disable validation failed for user: "
+                    + userName);
         }
 
         if (isUserCertValid ) {
