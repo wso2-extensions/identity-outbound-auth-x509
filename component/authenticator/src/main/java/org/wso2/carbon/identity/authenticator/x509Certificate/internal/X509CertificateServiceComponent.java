@@ -45,6 +45,9 @@ import java.util.Hashtable;
  * interface="org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService"
  * cardinality="1..1" policy="dynamic" bind="setAccountLockService"
  * unbind="unsetAccountLockService"
+ * @scr.reference name="osgi.user.realm.service.default" interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService"
+ * unbind="unsetRealmService"
  */
 
 public class X509CertificateServiceComponent {
@@ -114,5 +117,22 @@ public class X509CertificateServiceComponent {
     protected void unsetAccountLockService(AccountLockService accountLockService) {
 
         X509CertificateDataHolder.getInstance().setAccountLockService(null);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("RealmService is set the X509 authenticator bundle.");
+        }
+
+        X509CertificateDataHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("RealmService is unset in the X509 authenticator bundle.");
+        }
+        X509CertificateDataHolder.getInstance().setRealmService(null);
     }
 }
