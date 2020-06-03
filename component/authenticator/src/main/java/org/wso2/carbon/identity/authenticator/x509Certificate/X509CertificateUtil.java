@@ -30,12 +30,15 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationException;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManager;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManagerImpl;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -376,7 +379,7 @@ public class X509CertificateUtil {
     }
 
     /**
-     * Check whether user account is locke or not.
+     * Check whether user account is locked or not.
      *
      * @param user Authenticated user.
      * @return boolean account locked or not.
@@ -397,4 +400,33 @@ public class X509CertificateUtil {
         return accountLock;
     }
 
+    /**
+     * Check whether user account is disabled or not.
+     *
+     * @param user Authenticated user.
+     * @return boolean account disabled or not.
+     */
+    public static boolean isAccountDisabled(AuthenticatedUser user) {
+
+        boolean accountDisable = false;
+        if (user != null) {
+            int tenantId = IdentityTenantUtil.getTenantId(user.getTenantDomain());
+            RealmService realmService = X509CertificateDataHolder.getInstance().getRealmService();
+            UserStoreManager userStoreManager;
+            UserRealm userRealm;
+            try {
+                userRealm = realmService.getTenantUserRealm(tenantId);
+                userStoreManager = userRealm.getUserStoreManager();
+                Map<String, String> values = userStoreManager.getUserClaimValues(IdentityUtil.addDomainToName(user
+                        .getUserName(), user.getUserStoreDomain()), new String[]{
+                        X509CertificateConstants.ACCOUNT_DISABLED_CLAIM}, UserCoreConstants.DEFAULT_PROFILE);
+                accountDisable = Boolean.parseBoolean(values.get(X509CertificateConstants.ACCOUNT_DISABLED_CLAIM));
+            } catch (UserStoreException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while checking account disable for user " + user.getUserName(), e);
+                }
+            }
+        }
+        return accountDisable;
+    }
 }
