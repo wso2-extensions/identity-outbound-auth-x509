@@ -286,7 +286,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
 
         try {
             // Check whether user account is locked or not.
-            if (isAccountLock(getUsername(authenticationContext))) {
+            if (isAccountLock(userName, authenticationContext.getTenantDomain())) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USER_ACCOUNT_LOCKED);
                 throw new AuthenticationFailedException("Account is locked for user: " + userName);
