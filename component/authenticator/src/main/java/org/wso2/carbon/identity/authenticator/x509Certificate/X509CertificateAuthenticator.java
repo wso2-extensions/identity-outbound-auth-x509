@@ -551,13 +551,15 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param userName               user name of the authenticated user.
      */
     private String getAuthenticUserName(String userName){
+
         String authenticUser = null;
         String tempUser = null;
         if (userName.contains("carbon.super")) {
             tempUser = userName.substring(userName.lastIndexOf('@') );
             authenticUser = userName.replace(tempUser, "");
             return authenticUser;
-        }else return userName;
+        } else return userName;
+
     }
 
     private void addMatchStringsToList(Matcher matcher, Set<String> matches) {

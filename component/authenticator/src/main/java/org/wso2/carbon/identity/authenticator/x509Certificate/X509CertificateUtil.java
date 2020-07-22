@@ -383,7 +383,7 @@ public class X509CertificateUtil {
      * Check whether user account is locked or not.
      *
      * @param userName  user that passed from the cert CN value.
-     *  @param tenantDomain  from "authenticationcontex".
+     *  @param tenantDomain  from "authenticationcontext".
      * @return boolean account locked or not.
      * @throws AccountLockServiceException
      */
