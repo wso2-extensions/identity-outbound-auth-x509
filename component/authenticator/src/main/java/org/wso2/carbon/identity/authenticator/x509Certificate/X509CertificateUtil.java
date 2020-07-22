@@ -388,15 +388,20 @@ public class X509CertificateUtil {
      * @throws AccountLockServiceException
      */
     public static boolean isAccountLock(String userName, String tenantDomain) throws AccountLockServiceException {
-
+        //Get the tenantaware username
+        String user = null;
+        if (userName.contains("@")) {
+            tenantDomain = userName.substring(userName.lastIndexOf('@') );
+            user = userName.replace(tenantDomain, "");
+        }
         boolean accountLock = false;
         if (userName != null) {
             try {
-                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(userName
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(user
                         , tenantDomain);
             } catch (AccountLockServiceException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Error while calling the account lock service for user " + userName, e);
+                    log.debug("Error while calling the account lock service for user " + user, e);
                 }
                 throw e;
             }

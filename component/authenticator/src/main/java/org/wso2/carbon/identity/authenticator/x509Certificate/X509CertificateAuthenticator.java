@@ -532,7 +532,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             if (log.isDebugEnabled()) {
                 log.debug("Authenticated username is: " + authenticatedUser);
             }
-            String authenticatedUserName = authenticatedUser.getAuthenticatedSubjectIdentifier();
+            String authenticatedUserName = getAuthenticUserName(authenticatedUser.getAuthenticatedSubjectIdentifier());
             if (authenticatedUserName.equals(subject)) {
                 addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
             } else {
@@ -544,6 +544,20 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         } else {
             addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
         }
+    }
+    /**
+     * check and validate the tenant domain of the user.
+     *
+     * @param userName               user name of the authenticated user.
+     */
+    private String getAuthenticUserName(String userName){
+        String authenticUser = null;
+        String tempUser = null;
+        if (userName.contains("carbon.super")) {
+            tempUser = userName.substring(userName.lastIndexOf('@') );
+            authenticUser = userName.replace(tempUser, "");
+            return authenticUser;
+        }else return userName;
     }
 
     private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
