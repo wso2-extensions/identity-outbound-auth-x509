@@ -532,7 +532,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             if (log.isDebugEnabled()) {
                 log.debug("Authenticated username is: " + authenticatedUser);
             }
-            String authenticatedUserName = getAuthenticUserName(authenticatedUser.getAuthenticatedSubjectIdentifier());
+            String authenticatedUserName = getAuthenticatedUserName(authenticatedUser.getAuthenticatedSubjectIdentifier());
             if (authenticatedUserName.equals(subject)) {
                 addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
             } else {
@@ -548,9 +548,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * check and validate the tenant domain of the user.
      *
-     * @param userName               user name of the authenticated user.
+     * @param userName          Check the user's tenant domain and build the user name according to that.
      */
-    private String getAuthenticUserName(String userName){
+    private String getAuthenticatedUserName(String userName){
 
         String authenticUser = null;
         String tempUser = null;
