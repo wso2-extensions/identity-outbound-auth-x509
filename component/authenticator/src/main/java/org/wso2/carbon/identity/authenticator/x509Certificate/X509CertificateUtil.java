@@ -55,6 +55,7 @@ import java.util.Map;
  * Working with certificate and claims store.
  */
 public class X509CertificateUtil {
+
     private static final Log log = LogFactory.getLog(X509CertificateUtil.class);
 
     /**
@@ -65,6 +66,7 @@ public class X509CertificateUtil {
      * @throws AuthenticationFailedException authentication failed exception
      */
     public static X509Certificate getCertificate(String username) throws AuthenticationFailedException {
+
         X509Certificate x509Certificate;
         UserRealm userRealm = getUserRealm(username);
         try {
@@ -109,6 +111,7 @@ public class X509CertificateUtil {
      */
     public static boolean addCertificate(String username, X509Certificate x509Certificate)
             throws AuthenticationFailedException {
+
         Map<String, String> claims = new HashMap<>();
         UserRealm userRealm = getUserRealm(username);
         try {
@@ -146,6 +149,7 @@ public class X509CertificateUtil {
     public static boolean validateCertificate(String userName, AuthenticationContext authenticationContext,
                                               byte[] certificateBytes, boolean isSelfRegistrationEnable)
             throws AuthenticationFailedException {
+
         X509Certificate x509Certificate;
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X509");
@@ -187,6 +191,7 @@ public class X509CertificateUtil {
      * @return boolean status of availability
      */
     public static boolean isCertificateExist(String userName) throws AuthenticationFailedException {
+
         return getCertificate(userName) != null;
     }
 
@@ -194,6 +199,7 @@ public class X509CertificateUtil {
      * Get parameter values from local file.
      */
     public static Map<String, String> getX509Parameters() {
+
         AuthenticatorConfig authConfig = FileBasedConfigurationBuilder.getInstance()
                 .getAuthenticatorBean(X509CertificateConstants.AUTHENTICATOR_NAME);
         if (authConfig != null) {
@@ -211,6 +217,7 @@ public class X509CertificateUtil {
      * @return X509Certificate claimURI
      */
     public static String getClaimUri() {
+
         String claimURI = X509CertificateConstants.CLAIM_DIALECT_URI;
         Map<String, String> parametersMap = getX509Parameters();
         if (parametersMap != null) {
@@ -233,6 +240,7 @@ public class X509CertificateUtil {
      * @throws AuthenticationFailedException
      */
     public static UserRealm getUserRealm(String username) throws AuthenticationFailedException {
+
         UserRealm userRealm = null;
         if (log.isDebugEnabled()) {
             log.debug("Getting userRealm for user: " + username);
@@ -331,7 +339,8 @@ public class X509CertificateUtil {
 
         if (Boolean.valueOf(getX509Parameters().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
             String[] filteredUsers = X509CertificateUtil.getUserRealm(userName).getUserStoreManager().listUsers
-                    (MultitenantUtils.getTenantAwareUsername(userName), X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
+                    (MultitenantUtils.getTenantAwareUsername(userName),
+                            X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
             if (filteredUsers.length == 1) {
                 if (log.isDebugEnabled()) {
                     log.debug("User exists with the user name: " + userName);
@@ -380,15 +389,15 @@ public class X509CertificateUtil {
     }
 
     /**
-     * Check whether user account is locked or not.
+     * Get the user account state by checking whether user account is locked or not.
      *
      * @param subject userName that passed from the cert CN value.
      * @return boolean account locked or not.
      * @throws AccountLockServiceException
      */
-    public static boolean isAccountLock(String subject) throws AccountLockServiceException {
+    public static boolean getAccountState(String subject) throws AccountLockServiceException {
         //Get the tenantaware username & particular tenant domain
-        String userName = null;
+        String userName = subject;
         String tenantDomain = null;
         if (subject.contains("@")) {
             userName = subject.substring(0, subject.lastIndexOf('@'));
