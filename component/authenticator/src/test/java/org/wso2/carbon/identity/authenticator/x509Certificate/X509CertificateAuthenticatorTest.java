@@ -368,7 +368,7 @@ public class X509CertificateAuthenticatorTest {
                         Matchers.anyBoolean())).thenReturn(true);
         mockStatic(IdentityUtil.class);
         when(X509CertificateUtil
-                .isAccountLock(Matchers.anyString())).thenReturn(false);
+                .getAccountState(Matchers.anyString())).thenReturn(false);
         when(X509CertificateUtil
                 .isAccountDisabled(Matchers.any(AuthenticatedUser.class))).thenReturn(false);
         when(IdentityUtil.getPrimaryDomainName()).thenReturn("PRIMARY");
