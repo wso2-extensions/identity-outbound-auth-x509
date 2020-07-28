@@ -404,6 +404,37 @@ public class X509CertificateUtil {
     }
 
     /**
+     * Get the user account state by checking  whether the user account is locked or not.
+     *
+     * @param subject userName that passed from the cert CN value.
+     * @return boolean account locked or not.
+     * @throws AccountLockServiceException
+     */
+    public static boolean isAccountLock(String subject) throws AccountLockServiceException {
+        //Get the tenantaware username & particular tenant domain
+        String userName = subject;
+        String tenantDomain = null;
+        if (subject.contains("@")) {
+            userName = subject.substring(0, subject.lastIndexOf('@'));
+            tenantDomain = subject.substring(subject.lastIndexOf('@') + 1);
+        }
+
+        boolean accountLock = false;
+        if (userName != null) {
+            try {
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(userName
+                        , tenantDomain);
+            } catch (AccountLockServiceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while calling the account lock service for user " + userName, e);
+                }
+                throw e;
+            }
+        }
+        return accountLock;
+    }
+
+    /**
      * Check whether user account is disabled or not.
      *
      * @param user Authenticated user.
