@@ -286,7 +286,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
 
         try {
             // Check whether user account is locked or not.
-            if (isAccountLock(userName, authenticationContext.getTenantDomain())) {
+            if (isAccountLock(userName)) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USER_ACCOUNT_LOCKED);
                 throw new AuthenticationFailedException("Account is locked for user: " + userName);
@@ -303,7 +303,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     + userName);
         }
 
-        if (isUserCertValid ) {
+        if (isUserCertValid) {
             try {
                 String userStoreDomain = getUserStoreDomainName(userName, authenticationContext);
                 userName = UserCoreUtil.addDomainToName(userName, userStoreDomain);
@@ -513,7 +513,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param claims                user claims.
      */
     private void validateUsingSubject(String subject, AuthenticationContext authenticationContext,
-            X509Certificate cert, Map<ClaimMapping, String> claims) throws AuthenticationFailedException {
+                                      X509Certificate cert, Map<ClaimMapping, String> claims)
+            throws AuthenticationFailedException {
 
         byte[] data;
         try {
@@ -527,12 +528,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         if (log.isDebugEnabled()) {
             log.debug("Getting X509Certificate username");
         }
-        
+
         if (authenticatedUser != null) {
             if (log.isDebugEnabled()) {
                 log.debug("Authenticated username is: " + authenticatedUser);
             }
-            String authenticatedUserName = getAuthenticatedUserName(authenticatedUser.getAuthenticatedSubjectIdentifier());
+            String authenticatedUserName = getAuthenticatedUserName(authenticatedUser);
             if (authenticatedUserName.equals(subject)) {
                 addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
             } else {
@@ -545,21 +546,19 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
         }
     }
+
     /**
      * check and validate the tenant domain of the user.
      *
-     * @param userName          Check the user's tenant domain and build the user name according to that.
+     * @param authenticatedUser Check the authenticated user's tenant domain and verify whether it from super tenant or different tenant .
      */
-    private String getAuthenticatedUserName(String userName){
+    private String getAuthenticatedUserName(AuthenticatedUser authenticatedUser) {
 
-        String authenticUser = null;
-        String tempUser = null;
-        if (userName.contains("carbon.super")) {
-            tempUser = userName.substring(userName.lastIndexOf('@') );
-            authenticUser = userName.replace(tempUser, "");
-            return authenticUser;
-        } else return userName;
-
+        String carbonSuperUser = null;
+        if (authenticatedUser.getAuthenticatedSubjectIdentifier().contains("carbon.super")) {
+            carbonSuperUser = authenticatedUser.getUserName();
+            return carbonSuperUser;
+        } else return authenticatedUser.getAuthenticatedSubjectIdentifier();
     }
 
     private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
