@@ -44,6 +44,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
@@ -554,11 +555,11 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      */
     private String getAuthenticatedUserName(AuthenticatedUser authenticatedUser) {
 
-        String carbonSuperUser = null;
-        if (authenticatedUser.getAuthenticatedSubjectIdentifier().contains("carbon.super")) {
-            carbonSuperUser = authenticatedUser.getUserName();
-            return carbonSuperUser;
-        } else return authenticatedUser.getAuthenticatedSubjectIdentifier();
+        String userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
+        if (userName.endsWith(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            userName = authenticatedUser.getUserName();
+        }
+        return userName;
     }
 
     private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
