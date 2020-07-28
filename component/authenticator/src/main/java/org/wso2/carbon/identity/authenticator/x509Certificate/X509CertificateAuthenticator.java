@@ -548,9 +548,9 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
-     * check and validate the tenant domain of the user.
+     * Check the authenticated user's tenant domain and verify whether it from super tenant or different tenant.
      *
-     * @param authenticatedUser Check the authenticated user's tenant domain and verify whether it from super tenant or different tenant .
+     * @param authenticatedUser Get the authenticated user object from the authentication context  .
      */
     private String getAuthenticatedUserName(AuthenticatedUser authenticatedUser) {
 
