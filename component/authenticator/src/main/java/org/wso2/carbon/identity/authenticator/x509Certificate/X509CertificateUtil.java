@@ -380,6 +380,30 @@ public class X509CertificateUtil {
     }
 
     /**
+     * Check whether user account is locked or not.
+     *
+     * @param user Authenticated user.
+     * @return boolean account locked or not.
+     * @throws AccountLockServiceException
+     */
+    public static boolean isAccountLock(AuthenticatedUser user) throws AccountLockServiceException {
+
+        boolean accountLock = false;
+        if (user != null) {
+            try {
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(user
+                        .getUserName(), user.getTenantDomain());
+            } catch (AccountLockServiceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while calling the account lock service for user " + user.getUserName(), e);
+                }
+                throw e;
+            }
+        }
+        return accountLock;
+    }
+
+    /**
      * Get the user account state by checking  whether the user account is locked or not.
      *
      * @param subject userName that passed from the cert CN value.
