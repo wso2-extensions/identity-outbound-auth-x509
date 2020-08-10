@@ -41,6 +41,7 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
@@ -413,7 +414,7 @@ public class X509CertificateUtil {
     public static boolean isAccountLock(String subject) throws AccountLockServiceException {
         //Get the tenantaware username & particular tenant domain
         String userName = subject;
-        String tenantDomain = null;
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         if (subject.contains("@")) {
             userName = subject.substring(0, subject.lastIndexOf('@'));
             tenantDomain = subject.substring(subject.lastIndexOf('@') + 1);
