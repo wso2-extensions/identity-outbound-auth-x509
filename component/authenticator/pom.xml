@@ -27,7 +27,7 @@
     <name>WSO2 Carbon - X509Certificate Authenticator</name>
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -35,6 +35,21 @@
             <groupId>org.wso2.carbon.extension.identity.x509certificate</groupId>
             <artifactId>org.wso2.carbon.extension.identity.x509Certificate.validation</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <repositories>
@@ -74,11 +89,11 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.identity.authenticator.x509Certificate.internal
+                            org.wso2.carbon.identity.framework.authenticator.x509Certificate.internal
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.authenticator.x509Certificate.internal,
-                            org.wso2.carbon.identity.authenticator.x509Certificate.*,
+                            !org.wso2.carbon.identity.framework.authenticator.x509Certificate.internal,
+                            org.wso2.carbon.identity.framework.authenticator.x509Certificate.*,
                         </Export-Package>
                         <Import-Package>
                             javax.servlet; version=2.4.0,
