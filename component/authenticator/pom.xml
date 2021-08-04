@@ -89,11 +89,11 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.identity.framework.authenticator.x509Certificate.internal
+                            org.wso2.carbon.identity.authenticator.x509Certificate.internal
                         </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.framework.authenticator.x509Certificate.internal,
-                            org.wso2.carbon.identity.framework.authenticator.x509Certificate.*,
+                            !org.wso2.carbon.identity.authenticator.x509Certificate.internal,
+                            org.wso2.carbon.identity.authenticator.x509Certificate.*,
                         </Export-Package>
                         <Import-Package>
                             javax.servlet; version=2.4.0,
