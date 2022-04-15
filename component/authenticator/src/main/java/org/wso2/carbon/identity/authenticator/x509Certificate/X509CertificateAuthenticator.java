@@ -44,6 +44,7 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
@@ -286,7 +287,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
 
         try {
             // Check whether user account is locked or not.
-            if (isAccountLock(getUsername(authenticationContext))) {
+            if (isAccountLock(userName)) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USER_ACCOUNT_LOCKED);
                 throw new AuthenticationFailedException("Account is locked for user: " + userName);
@@ -303,7 +304,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     + userName);
         }
 
-        if (isUserCertValid ) {
+        if (isUserCertValid) {
             try {
                 String userStoreDomain = getUserStoreDomainName(userName, authenticationContext);
                 userName = UserCoreUtil.addDomainToName(userName, userStoreDomain);
@@ -511,7 +512,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param claims                user claims.
      */
     private void validateUsingSubject(String subject, AuthenticationContext authenticationContext,
-            X509Certificate cert, Map<ClaimMapping, String> claims) throws AuthenticationFailedException {
+                                      X509Certificate cert, Map<ClaimMapping, String> claims)
+            throws AuthenticationFailedException {
 
         byte[] data;
         try {
@@ -525,12 +527,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         if (log.isDebugEnabled()) {
             log.debug("Getting X509Certificate username");
         }
-        
+
         if (authenticatedUser != null) {
             if (log.isDebugEnabled()) {
                 log.debug("Authenticated username is: " + authenticatedUser);
             }
-            String authenticatedUserName = authenticatedUser.getAuthenticatedSubjectIdentifier();
+            String authenticatedUserName = getAuthenticatedUserName(authenticatedUser);
             if (authenticatedUserName.equals(subject)) {
                 addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
             } else {
@@ -542,6 +544,20 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         } else {
             addOrValidateCertificate(subject, authenticationContext, data, claims, cert);
         }
+    }
+
+    /**
+     * Check the authenticated user's tenant domain and verify whether it from super tenant or different tenant.
+     *
+     * @param authenticatedUser Get the authenticated user object from the authentication context  .
+     */
+    private String getAuthenticatedUserName(AuthenticatedUser authenticatedUser) {
+
+        String userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
+        if (userName.endsWith(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            userName = authenticatedUser.getUserName();
+        }
+        return userName;
     }
 
     private void addMatchStringsToList(Matcher matcher, Set<String> matches) {
