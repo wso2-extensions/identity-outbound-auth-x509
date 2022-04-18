@@ -122,9 +122,8 @@ public class X509CertificateServiceComponent {
     protected void setRealmService(RealmService realmService) {
 
         if (log.isDebugEnabled()) {
-            log.debug("RealmService is set the X509 authenticator bundle.");
+            log.debug("RealmService is set in the X509 authenticator bundle.");
         }
-
         X509CertificateDataHolder.getInstance().setRealmService(realmService);
     }
 

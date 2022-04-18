@@ -76,6 +76,9 @@ public class X509CertificateDataHolder {
      */
     public AccountLockService getAccountLockService() {
 
+        if (accountLockService == null) {
+            throw new RuntimeException("Account lock service has not been set.");
+        }
         return accountLockService;
     }
 
@@ -96,6 +99,9 @@ public class X509CertificateDataHolder {
      */
     public RealmService getRealmService() {
 
+        if (realmService == null) {
+            throw new RuntimeException("Realm service has not been set.");
+        }
         return realmService;
     }
 

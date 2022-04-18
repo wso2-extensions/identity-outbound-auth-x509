@@ -384,7 +384,7 @@ public class X509CertificateUtil {
      *
      * @param user Authenticated user.
      * @return boolean account locked or not.
-     * @throws AccountLockServiceException
+     * @throws AccountLockServiceException if an error occurs when calling the account lock service.
      */
     public static boolean isAccountLock(AuthenticatedUser user) throws AccountLockServiceException {
 
@@ -408,11 +408,11 @@ public class X509CertificateUtil {
      *
      * @param subject userName that passed from the cert CN value.
      * @return boolean account locked or not.
-     * @throws AccountLockServiceException
+     * @throws AccountLockServiceException if an error occurs when calling the account lock service.
      */
     public static boolean isAccountLock(String subject) throws AccountLockServiceException {
 
-        //Get the tenantaware username & particular tenant domain
+        // Get the tenant aware username & particular tenant domain
         String userName = subject;
         String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         if (subject.contains("@")) {
@@ -440,7 +440,7 @@ public class X509CertificateUtil {
      *
      * @param user Authenticated user.
      * @return boolean account disabled or not.
-     * @throws UserStoreException
+     * @throws UserStoreException User store exception.
      */
     public static boolean isAccountDisabled(AuthenticatedUser user) throws UserStoreException {
 

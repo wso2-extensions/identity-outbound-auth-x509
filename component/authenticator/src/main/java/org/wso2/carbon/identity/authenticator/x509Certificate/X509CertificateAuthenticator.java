@@ -293,7 +293,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 throw new AuthenticationFailedException("Account is locked for user: " + userName);
             }
 
-            // Check whether user account is disable or not.
+            // Check whether user account is disabled or not.
             if (isAccountDisabled(getUsername(authenticationContext))) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USER_ACCOUNT_DISABLED);
@@ -301,7 +301,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             }
         } catch (UserStoreException | AccountLockServiceException e) {
             throw new AuthenticationFailedException("User account lock/disable validation failed for user: "
-                    + userName);
+                    + userName, e);
         }
 
         if (isUserCertValid) {
