@@ -28,14 +28,20 @@ import org.wso2.carbon.identity.application.authentication.framework.config.buil
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.identity.x509Certificate.validation.CertificateValidationException;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManager;
 import org.wso2.carbon.identity.x509Certificate.validation.service.RevocationValidationManagerImpl;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
@@ -373,4 +379,91 @@ public class X509CertificateUtil {
         }
     }
 
+    /**
+     * Check whether user account is locked or not.
+     *
+     * @param user Authenticated user.
+     * @return boolean account locked or not.
+     * @throws AccountLockServiceException if an error occurs when calling the account lock service.
+     */
+    public static boolean isAccountLock(AuthenticatedUser user) throws AccountLockServiceException {
+
+        boolean accountLock = false;
+        if (user != null) {
+            try {
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(user
+                        .getUserName(), user.getTenantDomain());
+            } catch (AccountLockServiceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while calling the account lock service for user " + user.getUserName(), e);
+                }
+                throw e;
+            }
+        }
+        return accountLock;
+    }
+
+    /**
+     * Get the user account state by checking  whether the user account is locked or not.
+     *
+     * @param subject userName that passed from the cert CN value.
+     * @return boolean account locked or not.
+     * @throws AccountLockServiceException if an error occurs when calling the account lock service.
+     */
+    public static boolean isAccountLock(String subject) throws AccountLockServiceException {
+
+        // Get the tenant aware username & particular tenant domain
+        String userName = subject;
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (subject.contains("@")) {
+            userName = subject.substring(0, subject.lastIndexOf('@'));
+            tenantDomain = subject.substring(subject.lastIndexOf('@') + 1);
+        }
+
+        boolean accountLock = false;
+        if (userName != null) {
+            try {
+                accountLock = X509CertificateDataHolder.getInstance().getAccountLockService().isAccountLocked(userName
+                        , tenantDomain);
+            } catch (AccountLockServiceException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while calling the account lock service for user " + userName, e);
+                }
+                throw e;
+            }
+        }
+        return accountLock;
+    }
+
+    /**
+     * Check whether user account is disabled or not.
+     *
+     * @param user Authenticated user.
+     * @return boolean account disabled or not.
+     * @throws UserStoreException User store exception.
+     */
+    public static boolean isAccountDisabled(AuthenticatedUser user) throws UserStoreException {
+
+        boolean accountDisable = false;
+        if (user != null) {
+            int tenantId = IdentityTenantUtil.getTenantId(user.getTenantDomain());
+            RealmService realmService = X509CertificateDataHolder.getInstance().getRealmService();
+            UserStoreManager userStoreManager;
+            UserRealm userRealm;
+            try {
+                userRealm = realmService.getTenantUserRealm(tenantId);
+                userStoreManager = userRealm.getUserStoreManager();
+                Map<String, String> values = userStoreManager.getUserClaimValues(IdentityUtil.addDomainToName(user
+                        .getUserName(), user.getUserStoreDomain()), new String[]{
+                        X509CertificateConstants.ACCOUNT_DISABLED_CLAIM}, UserCoreConstants.DEFAULT_PROFILE);
+                accountDisable = Boolean.parseBoolean(values.get(X509CertificateConstants.ACCOUNT_DISABLED_CLAIM));
+            } catch (UserStoreException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while checking account disable for user " + user.getUserName(), e);
+                }
+                throw e;
+            }
+        }
+        return accountDisable;
+    }
 }
