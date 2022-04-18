@@ -29,6 +29,8 @@ import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateAut
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateConstants;
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateDataHolder;
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateServlet;
+import org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -39,6 +41,13 @@ import java.util.Hashtable;
  * @scr.reference name="osgi.httpservice" interface="org.osgi.service.http.HttpService"
  * cardinality="1..1" policy="dynamic" bind="setHttpService"
  * unbind="unsetHttpService"
+ * @scr.reference name="accountLockService"
+ * interface="org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService"
+ * cardinality="1..1" policy="dynamic" bind="setAccountLockService"
+ * unbind="unsetAccountLockService"
+ * @scr.reference name="osgi.user.realm.service.default" interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService"
+ * unbind="unsetRealmService"
  */
 
 public class X509CertificateServiceComponent {
@@ -98,5 +107,31 @@ public class X509CertificateServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("HTTP Service is unset in the X509 Certificate Servlet");
         }
+    }
+
+    protected void setAccountLockService(AccountLockService accountLockService) {
+
+        X509CertificateDataHolder.getInstance().setAccountLockService(accountLockService);
+    }
+
+    protected void unsetAccountLockService(AccountLockService accountLockService) {
+
+        X509CertificateDataHolder.getInstance().setAccountLockService(null);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("RealmService is set in the X509 authenticator bundle.");
+        }
+        X509CertificateDataHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("RealmService is unset in the X509 authenticator bundle.");
+        }
+        X509CertificateDataHolder.getInstance().setRealmService(null);
     }
 }

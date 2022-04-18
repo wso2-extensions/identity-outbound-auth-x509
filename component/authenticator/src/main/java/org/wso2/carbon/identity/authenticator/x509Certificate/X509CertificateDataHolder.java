@@ -19,6 +19,8 @@
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.osgi.service.http.HttpService;
+import org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * Singleton class to hold HTTP Service
@@ -27,6 +29,8 @@ public class X509CertificateDataHolder {
 
     private static volatile X509CertificateDataHolder dataHolder = null;
     private HttpService httpService;
+    private AccountLockService accountLockService;
+    private RealmService realmService;
 
     private X509CertificateDataHolder() {
     }
@@ -63,5 +67,51 @@ public class X509CertificateDataHolder {
      */
     public void setHttpService(HttpService httpService) {
         this.httpService = httpService;
+    }
+
+    /**
+     * Set account lock service.
+     *
+     * @return account lock service
+     */
+    public AccountLockService getAccountLockService() {
+
+        if (accountLockService == null) {
+            throw new RuntimeException("Account lock service has not been set.");
+        }
+        return accountLockService;
+    }
+
+    /**
+     * Get account lock service.
+     *
+     * @param accountLockService
+     */
+    public void setAccountLockService(AccountLockService accountLockService) {
+
+        this.accountLockService = accountLockService;
+    }
+
+    /***
+     * Get realm service.
+     *
+     * @return RealmService
+     */
+    public RealmService getRealmService() {
+
+        if (realmService == null) {
+            throw new RuntimeException("Realm service has not been set.");
+        }
+        return realmService;
+    }
+
+    /**
+     * Set realm service.
+     *
+     * @param realmService realm service to be set.
+     */
+    public void setRealmService(RealmService realmService) {
+
+        this.realmService = realmService;
     }
 }
