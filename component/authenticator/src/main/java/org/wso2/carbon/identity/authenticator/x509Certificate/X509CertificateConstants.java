@@ -56,6 +56,8 @@ public class X509CertificateConstants {
     public static final String USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE = "18003";
     public static final String X509_CERTIFICATE_USERNAME = "X509CertificateUsername";
     public static final String USER_NOT_FOUND = "17001";
+    public static final String USER_ACCOUNT_LOCKED = "17002";
+    public static final String USER_ACCOUNT_DISABLED = "17010";
     public static final String X509_CERTIFICATE_NOT_VALID_ERROR_CODE = "18015";
     public static final String X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE = "17003";
     public static final String X509_CERTIFICATE_ALTERNATIVE_NAMES_REGEX_MULTIPLE_MATCHES_ERROR_CODE = "17004";
@@ -70,5 +72,6 @@ public class X509CertificateConstants {
     public static final int MAX_ITEM_LIMIT_UNLIMITED = -1;
     public static final String SEARCH_ALL_USERSTORES = "SearchAllUserStores";
     public static final String LOGIN_CLAIM_URIS = "LoginClaimURIs";
+    public static final String ACCOUNT_DISABLED_CLAIM = "http://wso2.org/claims/identity/accountDisabled";
 
 }

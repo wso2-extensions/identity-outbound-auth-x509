@@ -37,6 +37,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.identity.event.handler.accountlock</groupId>
+            <artifactId>org.wso2.carbon.identity.handler.event.account.lock</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -51,7 +56,14 @@
             <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <id>wso2-nexus</id>
