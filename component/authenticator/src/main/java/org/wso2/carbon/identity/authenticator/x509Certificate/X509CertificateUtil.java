@@ -413,12 +413,8 @@ public class X509CertificateUtil {
     public static boolean isAccountLock(String subject) throws AccountLockServiceException {
 
         // Get the tenant aware username & particular tenant domain
-        String userName = subject;
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (subject.contains("@")) {
-            userName = subject.substring(0, subject.lastIndexOf('@'));
-            tenantDomain = subject.substring(subject.lastIndexOf('@') + 1);
-        }
+        String userName = MultitenantUtils.getTenantAwareUsername(subject);
+        String tenantDomain = MultitenantUtils.getTenantDomain(subject);
 
         boolean accountLock = false;
         if (userName != null) {
