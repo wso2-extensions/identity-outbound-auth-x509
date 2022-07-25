@@ -284,6 +284,20 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     X509CertificateConstants.X509_CERTIFICATE_NOT_VALIDATED_ERROR_CODE);
             throw new AuthenticationFailedException("Error in validating the user certificate", e);
         }
+        String userStoreDomain;
+        if (isUserCertValid) {
+            try {
+                userStoreDomain = getUserStoreDomainName(userName, authenticationContext);
+                userName = UserCoreUtil.addDomainToName(userName, userStoreDomain);
+                UserCoreUtil.setDomainInThreadLocal(userStoreDomain);
+            } catch (UserStoreException e) {
+                throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
+            }
+        } else {
+            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                    X509CertificateConstants.X509_CERTIFICATE_NOT_VALID_ERROR_CODE);
+            throw new AuthenticationFailedException("X509Certificate is not valid");
+        }
 
         try {
             // Check whether user account is locked or not.
@@ -294,7 +308,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             }
 
             // Check whether user account is disabled or not.
-            if (isAccountDisabled(getUsername(authenticationContext))) {
+            if (isAccountDisabled(AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(userName))) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USER_ACCOUNT_DISABLED);
                 throw new AuthenticationFailedException("Account is disabled for user: " + userName);
@@ -303,21 +317,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throw new AuthenticationFailedException("User account lock/disable validation failed for user: "
                     + userName, e);
         }
-
-        if (isUserCertValid) {
-            try {
-                String userStoreDomain = getUserStoreDomainName(userName, authenticationContext);
-                userName = UserCoreUtil.addDomainToName(userName, userStoreDomain);
-                UserCoreUtil.setDomainInThreadLocal(userStoreDomain);
-            } catch (UserStoreException e) {
-                throw new AuthenticationFailedException("Cannot find the user realm for the username: " + userName, e);
-            }
-            allowUser(userName, claims, cert, authenticationContext);
-        } else {
-            authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
-                    X509CertificateConstants.X509_CERTIFICATE_NOT_VALID_ERROR_CODE);
-            throw new AuthenticationFailedException("X509Certificate is not valid");
-        }
+        allowUser(userName, claims, cert, authenticationContext);
     }
 
     /**
@@ -604,7 +604,11 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
             }
         } else {
-            return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
+            if (userIdentifier.indexOf("/") > 0) {
+                return getDomainNameByUserIdentifier(userIdentifier);
+            } else {
+                return UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME;
+            }
         }
     }
 
