@@ -20,6 +20,7 @@
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -33,6 +34,8 @@ import org.wso2.carbon.identity.application.authentication.framework.exception.A
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
@@ -43,6 +46,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -53,7 +58,7 @@ import static org.testng.Assert.fail;
  * Tests for X509CertificateAuthenticator.
  */
 @PrepareForTest({X509CertificateAuthenticator.class, X509CertificateUtil.class, FrameworkUtils.class, IdentityUtil
-        .class})
+        .class, AbstractUserStoreManager.class})
 @PowerMockIgnore({ "javax.xml.*"})
 public class X509CertificateAuthenticatorTest {
 
@@ -190,6 +195,32 @@ public class X509CertificateAuthenticatorTest {
                     + "MnL4jtEI7tHs89GB+tfurD2dsSLW5ghXaDwmZTNuaUOgD8SRYwh0AG+en1Xk2v3/\n"
                     + "73zDq+0+CCuZv87EyQbA5QobwBlYNe45ocyxSzocJLTapVkcXytDr/+ZhhdB7ybL\n" + "UZoGqB7ayed6KBFi";
 
+    private static final String CERT_WITH_CN_AS_DOMAIN_PREPENDED_USER_NAME =
+            "MIIDiDCCAnACCQDq89XWcAHDDTANBgkqhkiG9w0BAQsFADCBhDELMAkGA1UEBhMC\n" +
+                    "U0wxEDAOBgNVBAgMB1dlc3Rlcm4xEDAOBgNVBAcMB0NvbG9tYm8xDTALBgNVBAoM\n" +
+                    "BFdTTzIxDDAKBgNVBAsMA0RldjEVMBMGA1UEAwwMU1RPUkUxL3VzZXIxMR0wGwYJ\n" +
+                    "KoZIhvcNAQkBFg5hZG1pbkB3c28yLmNvbTAgFw0yMjA3MDgwMzA0MThaGA8zMDIx\n" +
+                    "MTEwODAzMDQxOFowgYQxCzAJBgNVBAYTAlNMMRAwDgYDVQQIDAdXZXN0ZXJuMRAw\n" +
+                    "DgYDVQQHDAdDb2xvbWJvMQ0wCwYDVQQKDARXU08yMQwwCgYDVQQLDANEZXYxFTAT\n" +
+                    "BgNVBAMMDFNUT1JFMS91c2VyMTEdMBsGCSqGSIb3DQEJARYOYWRtaW5Ad3NvMi5j\n" +
+                    "b20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQD7rN9k6Ltx85vTATN+\n" +
+                    "5H5r+mBVUMV7OpATNzhz0mKLr8oTao9uO4srAYyGTLGcg0kTpzLcAPpcgnbc8dt2\n" +
+                    "dmVpZAlIx5OBn/7oF2jiFlPz2pN+KFE8O4IweuIDPjodA6SEPY7+2DvpH0Me7HTA\n" +
+                    "ZV0D/yc/LH4NjHe7usLoffCJ9W0m/N01NXm2ZeuVkuaRqAmEzGisN8lcRdSUHQgv\n" +
+                    "UquH5YhlkrWFzHn3x3WoREWNCYt1egRHuif8WP5QHS/414gYvey/woA59TlQZRSQ\n" +
+                    "B1Ea7b9jcuBYlR7R6kaoNv4UMPPI42Ketu7uFM6etCOXrzVqCU+XPzymUKQfdB3+\n" +
+                    "dsvTAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAHNUGqVVTUB+u2RXC/eg5qcvZEpR\n" +
+                    "aZFJdhUzMDfP15t1PdchEb4ewrxlUIwu77oI9xABgTn9gwVBiz7DfejaN5xveeRX\n" +
+                    "KBHir+Hp29JByp5I6d76vttTPRIwx5OFxP9hea+yadBswL8z8md5vLMjcF8XJVmY\n" +
+                    "OPTSboIfBZTQWUUFdqQL2gcmpGna+QLDtbNdCOGO+57mInjQJsYC4uNiB0AohKe3\n" +
+                    "t0+WO4CowrWdcZTJLAegnipZ6CtZ5myCtyuWe25Xf5xIWLF9g7N80628B14hdbFw\n" +
+                    "Um+QzdwPxv1XoBOeT/r41I5Q1RnrPqArbIuYtVBDEYYk7MohXInMOlSbezo=";
+    @Mock
+    private UserRealm userRealmMock;
+
+    @Mock
+    private AbstractUserStoreManager userStoreManagerMock;
+
     @DataProvider(name = "provideX509Certificates")
     public Object[][] provideTestData() throws Exception {
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
@@ -302,7 +333,45 @@ public class X509CertificateAuthenticatorTest {
         parameterMap7.put(X509CertificateConstants.USER_NAME_REGEX, "^[a-zA-Z]{3}.[a-zA-Z]{2}$");
         parameterMap7.put(X509CertificateConstants.USERNAME, "CN");
         authenticatorConfig7.setParameterMap(parameterMap7);
-        
+
+        // Authenticating user when SEARCH_ALL_USERSTORES false and CN is domain prepended username.
+        X509Certificate cert8 = (X509Certificate) factory
+                .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
+                        CERT_WITH_CN_AS_DOMAIN_PREPENDED_USER_NAME)));
+        X509Certificate certificateArrayObject8[] = {cert8, null};
+
+        SequenceConfig sequenceConfig8 = new SequenceConfig();
+        Map<Integer, StepConfig> stepMap8 = new HashMap<>();
+        StepConfig stepConfig8 = new StepConfig();
+        stepConfig8.setAuthenticatedUser(null);
+        stepMap8.put(1, stepConfig8);
+        sequenceConfig8.setStepMap(stepMap8);
+
+        AuthenticatorConfig authenticatorConfig8 = new AuthenticatorConfig();
+        Map<String, String> parameterMap8 = new HashMap<>();
+        parameterMap8.put(X509CertificateConstants.SEARCH_ALL_USERSTORES, "false");
+        parameterMap8.put(X509CertificateConstants.USERNAME, "CN");
+        authenticatorConfig8.setParameterMap(parameterMap8);
+
+        // Authenticating user when SEARCH_ALL_USERSTORES true and CN is domain prepended username.
+        X509Certificate cert9 = (X509Certificate) factory
+                .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
+                        CERT_WITH_CN_AS_DOMAIN_PREPENDED_USER_NAME)));
+        X509Certificate certificateArrayObject9[] = {cert9, null};
+
+        SequenceConfig sequenceConfig9 = new SequenceConfig();
+        Map<Integer, StepConfig> stepMap9 = new HashMap<>();
+        StepConfig stepConfig9 = new StepConfig();
+        stepConfig9.setAuthenticatedUser(null);
+        stepMap9.put(1, stepConfig9);
+        sequenceConfig9.setStepMap(stepMap9);
+
+        AuthenticatorConfig authenticatorConfig9 = new AuthenticatorConfig();
+        Map<String, String> parameterMap9 = new HashMap<>();
+        parameterMap9.put(X509CertificateConstants.SEARCH_ALL_USERSTORES, "true");
+        parameterMap9.put(X509CertificateConstants.USERNAME, "CN");
+        authenticatorConfig9.setParameterMap(parameterMap9);
+
         return new Object[][] {
                 {
                         certificateArrayObject1, authenticatorConfig1, sequenceConfig1, true,
@@ -325,6 +394,12 @@ public class X509CertificateAuthenticatorTest {
                 },
                 {
                         certificateArrayObject7, authenticatorConfig7, sequenceConfig2, false, ""
+                },
+                {
+                        certificateArrayObject8, authenticatorConfig8, sequenceConfig8, false, ""
+                },
+                {
+                        certificateArrayObject9, authenticatorConfig9, sequenceConfig9, false, ""
                 },
                 };
     }
@@ -371,6 +446,16 @@ public class X509CertificateAuthenticatorTest {
                 .isAccountLock(Matchers.anyString())).thenReturn(false);
         when(X509CertificateUtil
                 .isAccountDisabled(Matchers.any(AuthenticatedUser.class))).thenReturn(false);
+
+        when(X509CertificateUtil.getUserRealm(anyString())).thenReturn(userRealmMock);
+
+        userStoreManagerMock = PowerMockito.mock(AbstractUserStoreManager.class);
+        when(userRealmMock.getUserStoreManager()).thenReturn(userStoreManagerMock);
+
+        String[] userList = new String[1];
+        userList[0] = "STORE1/user1";
+        when(userStoreManagerMock.listUsers(anyString(), anyInt())).thenReturn(userList);
+
         when(IdentityUtil.getPrimaryDomainName()).thenReturn("PRIMARY");
         if (exceptionShouldThrown) {
             try {
