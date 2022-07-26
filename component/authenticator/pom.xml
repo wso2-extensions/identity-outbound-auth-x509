@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.extension.identity.authenticator.outbound.x509Certificate</groupId>
         <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate</artifactId>
-        <version>3.1.5-SNAPSHOT</version>
+        <version>3.1.5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate.connector</artifactId>
