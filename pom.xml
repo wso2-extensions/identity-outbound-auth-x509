@@ -25,7 +25,7 @@
     </parent>
     <groupId>org.wso2.carbon.extension.identity.authenticator.outbound.x509Certificate</groupId>
     <artifactId>org.wso2.carbon.extension.identity.authenticator.x509Certificate</artifactId>
-    <version>3.1.8</version>
+    <version>3.1.9-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon Extension - X509 Certificate POM</name>
     <url>http://wso2.org</url>
@@ -90,7 +90,7 @@
         <url>https://github.com/wso2-extensions/identity-outbound-auth-x509.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/identity-outbound-auth-x509.git
         </developerConnection>
-        <tag>v3.1.8</tag>
+        <tag>org.wso2.carbon.extension.identity.authenticator.x509Certificate-2.0.1</tag>
     </scm>
     <build>
         <extensions>
