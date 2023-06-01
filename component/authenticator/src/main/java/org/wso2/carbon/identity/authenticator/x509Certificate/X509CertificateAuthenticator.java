@@ -218,7 +218,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     /**
      * Resolves username of the subject attribute.
      *
-     * @param identifier            username
+     * @param identifier            identifier specified in the certificate
      * @param authenticationContext authentication context
      *
      * @return resolved username
