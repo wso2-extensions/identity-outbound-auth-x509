@@ -248,7 +248,6 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     throw new AuthenticationFailedException("Conflicting users with claim value: " + identifier);
                 }
             }
-            throw new AuthenticationFailedException("No user found with claim value: " + identifier);
         }
         return identifier;
     }
