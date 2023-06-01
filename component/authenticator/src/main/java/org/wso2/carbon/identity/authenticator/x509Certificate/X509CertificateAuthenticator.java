@@ -185,8 +185,14 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     }
                     authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, subjectAttribute);
                 } else {
-                    String userName = (String) authenticationContext
-                            .getProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME);
+                    String userName = null;
+                    try {
+                        userName = resolveUsernameFromIdentifier((String) authenticationContext.getProperty(
+                                X509CertificateConstants.X509_CERTIFICATE_USERNAME), authenticationContext);
+                    } catch (UserStoreException | AuthenticationFailedException e) {
+                        throw new AuthenticationFailedException("Error occurred while resolving the username", e);
+                    }
+
                     if (StringUtils.isEmpty(userName)) {
                         authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                                 X509CertificateConstants.USERNAME_NOT_FOUND_FOR_X509_CERTIFICATE_ATTRIBUTE);
@@ -207,6 +213,43 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     X509CertificateConstants.X509_CERTIFICATE_NOT_FOUND_ERROR_CODE);
             throw new AuthenticationFailedException("Unable to find X509 Certificate in browser");
         }
+    }
+
+    /**
+     * Resolves username of the subject attribute.
+     *
+     * @param identifier            identifier specified in the certificate
+     * @param authenticationContext authentication context
+     *
+     * @return resolved username
+     */
+    private String resolveUsernameFromIdentifier(String identifier, AuthenticationContext authenticationContext)
+            throws AuthenticationFailedException, UserStoreException {
+
+        if (getAuthenticatorConfig().getParameterMap().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
+            String[] attributeClaimUris = getAuthenticatorConfig().getParameterMap()
+                    .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",");
+
+            String tenantDomain = authenticationContext.getTenantDomain();
+            if (StringUtils.isEmpty(tenantDomain)) {
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+
+            AbstractUserStoreManager aum = (AbstractUserStoreManager) X509CertificateUtil
+                    .getUserRealmByTenantDomain(tenantDomain).getUserStoreManager();
+
+            for (String attributeClaimUri : attributeClaimUris) {
+                String[] usersWithClaim = aum.getUserList(attributeClaimUri, identifier, null);
+                if (usersWithClaim.length == 1) {
+                    return usersWithClaim[0];
+                } else if (usersWithClaim.length > 1) {
+                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
+                            X509CertificateConstants.USERNAME_CONFLICT);
+                    throw new AuthenticationFailedException("Conflicting users with claim value: " + identifier);
+                }
+            }
+        }
+        return identifier;
     }
 
     /**
