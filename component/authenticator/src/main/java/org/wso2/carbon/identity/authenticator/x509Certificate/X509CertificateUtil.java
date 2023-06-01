@@ -252,6 +252,33 @@ public class X509CertificateUtil {
     }
 
     /**
+     * Get user realm by tenant domain.
+     *
+     * @param tenantDomain tenant domain
+     * @return user realm
+     * @throws AuthenticationFailedException if error occurred while getting user realm.
+     */
+    public static UserRealm getUserRealmByTenantDomain(String tenantDomain) throws AuthenticationFailedException {
+
+        UserRealm userRealm = null;
+        if (log.isDebugEnabled()) {
+            log.debug("Getting userRealm for tenantDomain: " + tenantDomain);
+        }
+
+        try {
+            if (StringUtils.isNotEmpty(tenantDomain)) {
+                int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+                RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();
+                userRealm = realmService.getTenantUserRealm(tenantId);
+            }
+        } catch (UserStoreException e) {
+            throw new AuthenticationFailedException(String.format("Cannot find the user realm for the tenantDomain: %s",
+                    tenantDomain), e);
+        }
+        return userRealm;
+    }
+
+    /**
      * Check the revocation status of the certificate
      *
      * @param x509Certificate x509 certificate
