@@ -187,7 +187,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 } else {
                     String userName = null;
                     try {
-                        userName = resolveIdentifier((String) authenticationContext.getProperty(
+                        userName = resolveUsernameFromIdentifier((String) authenticationContext.getProperty(
                                 X509CertificateConstants.X509_CERTIFICATE_USERNAME), authenticationContext);
                     } catch (UserStoreException | AuthenticationFailedException e) {
                         throw new AuthenticationFailedException("Error occurred while resolving the username", e);
@@ -223,7 +223,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      *
      * @return resolved username
      */
-    private String resolveIdentifier(String identifier, AuthenticationContext authenticationContext)
+    private String resolveUsernameFromIdentifier(String identifier, AuthenticationContext authenticationContext)
             throws AuthenticationFailedException, UserStoreException {
 
         if (getAuthenticatorConfig().getParameterMap().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
@@ -231,7 +231,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",");
 
             String tenantDomain = authenticationContext.getTenantDomain();
-            if (tenantDomain == null || tenantDomain.isEmpty()) {
+            if (StringUtils.isEmpty(tenantDomain)) {
                 tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
 
