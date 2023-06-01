@@ -259,8 +259,8 @@ public class X509CertificateUtil {
      * @throws AuthenticationFailedException if error occurred while getting user realm.
      */
     public static UserRealm getUserRealmByTenantDomain(String tenantDomain) throws AuthenticationFailedException {
-        UserRealm userRealm = null;
 
+        UserRealm userRealm = null;
         log.debug(String.format("Getting userRealm for tenantDomain: %s", tenantDomain));
 
         try {
