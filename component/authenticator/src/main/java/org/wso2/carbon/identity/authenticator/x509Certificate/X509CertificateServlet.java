@@ -18,7 +18,8 @@
  */
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
-import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.core.ServiceURLBuilder;
+import org.wso2.carbon.identity.core.URLBuilderException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -59,8 +60,15 @@ public class X509CertificateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
             throws ServletException, IOException {
-        String commonAuthURL = IdentityUtil
-                .getServerURL(X509CertificateConstants.COMMON_AUTH, false, true);
+
+        String commonAuthURL;
+        try {
+            commonAuthURL = ServiceURLBuilder.create().addPath(X509CertificateConstants.COMMON_AUTH).build()
+                    .getAbsoluteInternalURL();
+        } catch (URLBuilderException e) {
+            throw new RuntimeException("Error occurred while building URL.", e);
+        }
+
         String param = servletRequest.getParameter(X509CertificateConstants.SESSION_DATA_KEY);
         if (param == null) {
             throw new IllegalArgumentException(X509CertificateConstants.SESSION_DATA_KEY

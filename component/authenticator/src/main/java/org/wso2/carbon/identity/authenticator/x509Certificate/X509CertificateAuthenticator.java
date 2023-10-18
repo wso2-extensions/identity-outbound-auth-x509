@@ -36,6 +36,8 @@ import org.wso2.carbon.identity.application.authentication.framework.model.Authe
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
+import org.wso2.carbon.identity.core.ServiceURLBuilder;
+import org.wso2.carbon.identity.core.URLBuilderException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -110,7 +112,13 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             throws AuthenticationFailedException {
         try {
             if (authenticationContext.isRetrying()) {
-                String errorPageUrl = IdentityUtil.getServerURL(X509CertificateConstants.ERROR_PAGE, false, false);
+                String errorPageUrl;
+                try {
+                    errorPageUrl = ServiceURLBuilder.create().addPath(X509CertificateConstants.ERROR_PAGE).build()
+                            .getAbsoluteInternalURL();
+                } catch (URLBuilderException e) {
+                    throw new RuntimeException("Error occurred while building URL.", e);
+                }
                 String redirectUrl = errorPageUrl + ("?" + FrameworkConstants.SESSION_DATA_KEY + "="
                         + authenticationContext.getContextIdentifier()) + "&" + X509CertificateConstants.AUTHENTICATORS
                         + "=" + getName() + X509CertificateConstants.RETRY_PARAM_FOR_CHECKING_CERTIFICATE
