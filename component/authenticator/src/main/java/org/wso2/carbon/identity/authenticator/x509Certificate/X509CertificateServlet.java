@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 
 /**
@@ -67,6 +69,21 @@ public class X509CertificateServlet extends HttpServlet {
                     .getAbsoluteInternalURL();
         } catch (URLBuilderException e) {
             throw new RuntimeException("Error occurred while building URL.", e);
+        }
+
+        String authenticationEndpoint = X509CertificateUtil.getX509Parameters().get(X509CertificateConstants
+                .AUTHENTICATION_ENDPOINT_PARAMETER);
+
+        if (authenticationEndpoint != null) {
+            URL authenticationEndpointURL = new URL(authenticationEndpoint);
+            String protocol = authenticationEndpointURL.getProtocol();
+            String host = authenticationEndpointURL.getHost();
+            int port = authenticationEndpointURL.getPort();
+            if (port == -1) {
+                commonAuthURL = protocol + "://" + host + "/" + X509CertificateConstants.COMMON_AUTH;
+            } else {
+                commonAuthURL = protocol + "://" + host + ":" + port + "/" + X509CertificateConstants.COMMON_AUTH;
+            }
         }
 
         String param = servletRequest.getParameter(X509CertificateConstants.SESSION_DATA_KEY);
