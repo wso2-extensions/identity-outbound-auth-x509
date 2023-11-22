@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 
@@ -26,7 +27,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -78,7 +78,7 @@ public class X509CertificateServlet extends HttpServlet {
         String authenticationEndpoint = X509CertificateUtil.getX509Parameters().get(X509CertificateConstants
                 .AUTHENTICATION_ENDPOINT_PARAMETER);
 
-        if (authenticationEndpoint != null) {
+        if (StringUtils.isNotBlank(authenticationEndpoint)) {
             URL authenticationEndpointURL = new URL(authenticationEndpoint);
             String protocol = authenticationEndpointURL.getProtocol();
             String host = authenticationEndpointURL.getHost();
