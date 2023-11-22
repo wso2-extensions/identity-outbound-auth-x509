@@ -30,6 +30,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import static org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateUtil.DOMAIN_PATH_SEPARATOR;
+import static org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateUtil.DOMAIN_PORT_SEPARATOR;
+import static org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateUtil.PROTOCOL_DOMAIN_SEPARATOR;
+
 /**
  * X509 Certificate Servlet.
  */
@@ -80,9 +84,11 @@ public class X509CertificateServlet extends HttpServlet {
             String host = authenticationEndpointURL.getHost();
             int port = authenticationEndpointURL.getPort();
             if (port == -1) {
-                commonAuthURL = protocol + "://" + host + "/" + X509CertificateConstants.COMMON_AUTH;
+                commonAuthURL = protocol + PROTOCOL_DOMAIN_SEPARATOR + host + DOMAIN_PATH_SEPARATOR
+                        + X509CertificateConstants.COMMON_AUTH;
             } else {
-                commonAuthURL = protocol + "://" + host + ":" + port + "/" + X509CertificateConstants.COMMON_AUTH;
+                commonAuthURL = protocol + PROTOCOL_DOMAIN_SEPARATOR + host + DOMAIN_PORT_SEPARATOR
+                        + port + DOMAIN_PATH_SEPARATOR + X509CertificateConstants.COMMON_AUTH;
             }
         }
 

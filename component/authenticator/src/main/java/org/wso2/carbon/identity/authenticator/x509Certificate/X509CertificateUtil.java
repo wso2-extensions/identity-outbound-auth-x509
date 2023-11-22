@@ -58,6 +58,10 @@ import java.util.Map;
 public class X509CertificateUtil {
     private static final Log log = LogFactory.getLog(X509CertificateUtil.class);
 
+    public static final String PROTOCOL_DOMAIN_SEPARATOR = "://";
+    public static final String DOMAIN_PORT_SEPARATOR = ":";
+    public static final String DOMAIN_PATH_SEPARATOR = "/";
+
     /**
      * Get certificate from claims.
      *
