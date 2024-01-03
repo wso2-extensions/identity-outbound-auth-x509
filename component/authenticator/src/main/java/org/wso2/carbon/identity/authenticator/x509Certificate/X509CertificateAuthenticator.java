@@ -160,7 +160,11 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                                                  HttpServletResponse httpServletResponse,
                                                  AuthenticationContext authenticationContext)
             throws AuthenticationFailedException {
-        Object object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
+
+        Object object = authenticationContext.getProperty(X509CertificateConstants.X_509_CERTIFICATE);
+        if (object == null) {
+            object = httpServletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE);
+        }
         if (object != null) {
             X509Certificate[] certificates;
             if (object instanceof X509Certificate[]) {
