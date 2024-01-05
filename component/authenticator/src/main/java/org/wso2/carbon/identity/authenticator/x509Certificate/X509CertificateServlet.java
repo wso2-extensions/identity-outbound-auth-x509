@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
 
@@ -60,6 +62,12 @@ public class X509CertificateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
             throws ServletException, IOException {
+
+        AuthenticationContext authenticationContext = FrameworkUtils.getContextData(servletRequest);
+        if (authenticationContext != null) {
+            authenticationContext.setProperty(X509CertificateConstants.X_509_CERTIFICATE,
+                    servletRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE));
+        }
 
         String commonAuthURL;
         try {
