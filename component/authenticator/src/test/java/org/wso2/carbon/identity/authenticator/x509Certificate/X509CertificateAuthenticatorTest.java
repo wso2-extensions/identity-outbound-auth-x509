@@ -432,6 +432,7 @@ public class X509CertificateAuthenticatorTest {
         AuthenticatorConfig authenticatorConfig = (AuthenticatorConfig) object1;
         authenticatorConfig1 = authenticatorConfig;
         when(mockRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE)).thenReturn(certificateArray);
+        authenticationContext.setProperty(X509CertificateConstants.X_509_CERTIFICATE, certificateArray);
         X509CertificateAuthenticator x509CertificateAuthenticator = new MockX509CertificateAuthenticator();
         X509CertificateAuthenticator spy = PowerMockito.spy(x509CertificateAuthenticator);
         SequenceConfig sequenceConfig = (SequenceConfig) object2;
