@@ -38,15 +38,14 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
@@ -83,7 +82,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
 
     private static final Log log = LogFactory.getLog(X509CertificateAuthenticator.class);
 
-    public X509CertificateAuthenticator(){
+    public X509CertificateAuthenticator() {
 
         subjectAttributePattern = getAuthenticatorConfig().getParameterMap()
                 .get(X509CertificateConstants.USER_NAME_REGEX);
@@ -185,17 +184,19 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 if (alternativeNamePattern != null) {
                      alternativeName = getMatchedAlternativeName(cert, authenticationContext);
                      validateUsingSubject(alternativeName, authenticationContext, cert, claims);
-                     if(log.isDebugEnabled()){
+                     if (log.isDebugEnabled()) {
                          log.debug("Certificate validated using the alternative name: " + alternativeName);
                      }
-                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, alternativeName);
-                } else if (subjectAttributePattern != null){
+                    authenticationContext.setProperty(
+                            X509CertificateConstants.X509_CERTIFICATE_USERNAME, alternativeName);
+                } else if (subjectAttributePattern != null) {
                     subjectAttribute = getMatchedSubjectAttribute(certAttributes, authenticationContext);
                     validateUsingSubject(subjectAttribute, authenticationContext, cert, claims);
-                    if(log.isDebugEnabled()){
+                    if (log.isDebugEnabled()) {
                         log.debug("Certificate validated using the certificate subject attribute: " + subjectAttribute);
                     }
-                    authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_USERNAME, subjectAttribute);
+                    authenticationContext.setProperty(
+                            X509CertificateConstants.X509_CERTIFICATE_USERNAME, subjectAttribute);
                 } else {
                     String userName = null;
                     try {
@@ -212,7 +213,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                                 "Couldn't find the username for X509Certificate's attribute");
                     } else {
                         validateUsingSubject(userName, authenticationContext, cert, claims);
-                        if(log.isDebugEnabled()){
+                        if (log.isDebugEnabled()) {
                             log.debug("Certificate validated using the certificate username attribute: " + userName);
                         }
                     }
@@ -294,7 +295,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             if (log.isDebugEnabled()) {
                 log.debug(X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR);
             }
-            throw new AuthenticationFailedException(X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR);
+            throw new AuthenticationFailedException(
+                    X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_NO_MATCHES_ERROR);
         } else if (matchedStringList.size() > 1) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                     X509CertificateConstants.X509_CERTIFICATE_SUBJECTDN_REGEX_MULTIPLE_MATCHES_ERROR_CODE);
@@ -450,7 +452,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         }
         String userNameAttribute = getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.USERNAME);
         if (log.isDebugEnabled()) {
-            log.debug("Getting username attribute: "+ userNameAttribute);
+            log.debug("Getting username attribute: " + userNameAttribute);
         }
         for (Rdn distinguishNames : ldapDN.getRdns()) {
             claims.put(ClaimMapping.build(distinguishNames.getType(), distinguishNames.getType(),
@@ -502,7 +504,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
      * @param cert                  x509 certificate.
      * @param authenticationContext authenticationContext
      */
-    private String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext) throws AuthenticationFailedException {
+    private String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext)
+            throws AuthenticationFailedException {
 
         Set<String> matchedAlternativeNamesList = new HashSet<>();
         try {
@@ -510,14 +513,15 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             if (altNames != null) {
                 for (List item : altNames) {
                     ASN1InputStream decoder = null;
-                    if (item.toArray()[1] instanceof byte[])
+                    if (item.toArray()[1] instanceof byte[]) {
                         decoder = new ASN1InputStream((byte[]) item.toArray()[1]);
-                    else if (item.toArray()[1] instanceof String) {
+                    } else if (item.toArray()[1] instanceof String) {
                         Matcher m = alternativeNamesPatternCompiled.matcher((String) item.toArray()[1]);
                         addMatchStringsToList(m, matchedAlternativeNamesList);
                     }
-                    if (decoder == null)
+                    if (decoder == null) {
                         continue;
+                    }
                     String identity = decodeAlternativeName(decoder);
                     Matcher m = alternativeNamesPatternCompiled.matcher(identity);
                     addMatchStringsToList(m, matchedAlternativeNamesList);
@@ -545,7 +549,7 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
-     * Get decoded alternative name
+     * Get decoded alternative name.
      *
      * @param decoder ASN1 Decoder
      */
@@ -624,7 +628,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
 
     private String getUserStoreDomainName(String userIdentifier, AuthenticationContext authenticationContext)
             throws UserStoreException, AuthenticationFailedException {
-        if (Boolean.valueOf(getAuthenticatorConfig().getParameterMap().get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
+        if (Boolean.valueOf(getAuthenticatorConfig().getParameterMap()
+                .get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
             UserStoreManager um = X509CertificateUtil.getUserRealm(userIdentifier).getUserStoreManager();
             String[] filteredUsers = um.listUsers(MultitenantUtils.getTenantAwareUsername(userIdentifier),
                     X509CertificateConstants.MAX_ITEM_LIMIT_UNLIMITED);
@@ -637,11 +642,12 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.USERNAME_CONFLICT);
                 throw new AuthenticationFailedException("Conflicting users with user name: " + userIdentifier);
-            } else if (getAuthenticatorConfig().getParameterMap().containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
+            } else if (getAuthenticatorConfig().getParameterMap()
+                    .containsKey(X509CertificateConstants.LOGIN_CLAIM_URIS)) {
                 String[] multiAttributeClaimUris = getAuthenticatorConfig().getParameterMap()
                         .get(X509CertificateConstants.LOGIN_CLAIM_URIS).split(",");
-                AbstractUserStoreManager aum = (AbstractUserStoreManager) X509CertificateUtil.getUserRealm(userIdentifier)
-                        .getUserStoreManager();
+                AbstractUserStoreManager aum = (AbstractUserStoreManager)
+                        X509CertificateUtil.getUserRealm(userIdentifier).getUserStoreManager();
                 for (String multiAttributeClaimUri : multiAttributeClaimUris) {
                     String[] usersWithClaim = aum.getUserList(multiAttributeClaimUri, userIdentifier, null);
                     if (usersWithClaim.length == 1) {
@@ -649,7 +655,8 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
                     } else if (usersWithClaim.length > 1) {
                         authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                                 X509CertificateConstants.USERNAME_CONFLICT);
-                        throw new AuthenticationFailedException("Conflicting users with claim value: " + userIdentifier);
+                        throw new AuthenticationFailedException(
+                                "Conflicting users with claim value: " + userIdentifier);
                     }
                 }
                 throw new AuthenticationFailedException("Unable to find X509 Certificate's user in user store. ");
