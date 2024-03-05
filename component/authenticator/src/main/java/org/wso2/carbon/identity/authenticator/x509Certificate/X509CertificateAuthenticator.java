@@ -609,6 +609,10 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     private String getAuthenticatedUserName(AuthenticatedUser authenticatedUser) {
 
         String userName = authenticatedUser.getAuthenticatedSubjectIdentifier();
+        if (Boolean.parseBoolean(X509CertificateUtil.getX509Parameters()
+                .get(X509CertificateConstants.SEARCH_ALL_USERSTORES))) {
+            userName = UserCoreUtil.removeDomainFromName(userName);
+        }
         if (userName.endsWith(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             userName = authenticatedUser.getUserName();
         }
