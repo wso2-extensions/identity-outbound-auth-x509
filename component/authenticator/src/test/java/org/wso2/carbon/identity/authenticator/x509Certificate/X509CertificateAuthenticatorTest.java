@@ -19,11 +19,11 @@
 
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
@@ -45,9 +45,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -60,7 +62,7 @@ import static org.testng.Assert.fail;
 @PrepareForTest({X509CertificateAuthenticator.class, X509CertificateUtil.class, FrameworkUtils.class, IdentityUtil
         .class, AbstractUserStoreManager.class})
 @PowerMockIgnore({ "javax.xml.*"})
-public class X509CertificateAuthenticatorTest {
+public class X509CertificateAuthenticatorTest extends PowerMockTestCase {
 
     private static final String CERT_WITH_NO_ALTERNATIVE_NAMES =
             "MIIEATCCAumgAwIBAgIJAIlDo4F1ZJvAMA0GCSqGSIb3DQEBCwUAMIG+MQ8wDQYD\n"
@@ -227,7 +229,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert1 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_NO_ALTERNATIVE_NAMES)));
-        X509Certificate certificateArrayObject1[] = { cert1, null };
+        X509Certificate[] certificateArrayObject1 = { cert1, null };
 
         SequenceConfig sequenceConfig1 = new SequenceConfig();
         Map<Integer, StepConfig> stepMap1 = new HashMap<>();
@@ -250,7 +252,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert2 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_ALTERNATIVE_NAMES)));
-        X509Certificate certificateArrayObject2[] = { cert2, null };
+        X509Certificate[] certificateArrayObject2 = { cert2, null };
 
         SequenceConfig sequenceConfig2 = new SequenceConfig();
         Map<Integer, StepConfig> stepMap2 = new HashMap<>();
@@ -270,7 +272,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert3 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_ONE_CN_NO_AlTERNATIVE_NAMES)));
-        X509Certificate certificateArrayObject3[] = { cert3, null };
+        X509Certificate[] certificateArrayObject3 = { cert3, null };
 
         SequenceConfig sequenceConfig3 = new SequenceConfig();
         Map<Integer, StepConfig> stepMap3 = new HashMap<>();
@@ -288,7 +290,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert4 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_COMMA_SEPERATED_CN)));
-        X509Certificate certificateArrayObject4[] = { cert4, null };
+        X509Certificate[] certificateArrayObject4 = { cert4, null };
 
         SequenceConfig sequenceConfig4 = new SequenceConfig();
         Map<Integer, StepConfig> stepMap4 = new HashMap<>();
@@ -314,7 +316,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert6 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_SUBJECT_IN_THE_EMAIL)));
-        X509Certificate certificateArrayObject6[] = { cert6, null };
+        X509Certificate[] certificateArrayObject6 = { cert6, null };
         AuthenticatorConfig authenticatorConfig6 = new AuthenticatorConfig();
         Map<String, String> parameterMap6 = new HashMap<>();
         parameterMap6.put(X509CertificateConstants.USERNAME, "EMAILADDRESS");
@@ -325,7 +327,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert7 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_SIMILAR_ALTERNATIVE_NAMES)));
-        X509Certificate certificateArrayObject7[] = { cert7, null };
+        X509Certificate[] certificateArrayObject7 = { cert7, null };
 
         AuthenticatorConfig authenticatorConfig7 = new AuthenticatorConfig();
         Map<String, String> parameterMap7 = new HashMap<>();
@@ -338,7 +340,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert8 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_CN_AS_DOMAIN_PREPENDED_USER_NAME)));
-        X509Certificate certificateArrayObject8[] = {cert8, null};
+        X509Certificate[] certificateArrayObject8 = {cert8, null};
 
         SequenceConfig sequenceConfig8 = new SequenceConfig();
         Map<Integer, StepConfig> stepMap8 = new HashMap<>();
@@ -357,7 +359,7 @@ public class X509CertificateAuthenticatorTest {
         X509Certificate cert9 = (X509Certificate) factory
                 .generateCertificate(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(
                         CERT_WITH_CN_AS_DOMAIN_PREPENDED_USER_NAME)));
-        X509Certificate certificateArrayObject9[] = {cert9, null};
+        X509Certificate[] certificateArrayObject9 = {cert9, null};
 
         SequenceConfig sequenceConfig9 = new SequenceConfig();
         Map<Integer, StepConfig> stepMap9 = new HashMap<>();
@@ -440,13 +442,13 @@ public class X509CertificateAuthenticatorTest {
         doReturn(authenticatorConfig).when(spy, "getAuthenticatorConfig");
         mockStatic(X509CertificateUtil.class);
         when(X509CertificateUtil
-                .validateCertificate(Matchers.anyString(), Matchers.any(AuthenticationContext.class), any(byte[].class),
-                        Matchers.anyBoolean())).thenReturn(true);
+                .validateCertificate(anyString(), any(AuthenticationContext.class), any(byte[].class),
+                        anyBoolean())).thenReturn(true);
         mockStatic(IdentityUtil.class);
         when(X509CertificateUtil
-                .isAccountLock(Matchers.anyString())).thenReturn(false);
+                .isAccountLock(anyString())).thenReturn(false);
         when(X509CertificateUtil
-                .isAccountDisabled(Matchers.any(AuthenticatedUser.class))).thenReturn(false);
+                .isAccountDisabled(any(AuthenticatedUser.class))).thenReturn(false);
 
         when(X509CertificateUtil.getUserRealm(anyString())).thenReturn(userRealmMock);
 
