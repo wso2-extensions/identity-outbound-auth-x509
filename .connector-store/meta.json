@@ -1,0 +1,17 @@
+{
+    "name": "X509",
+    "owner": "WSO2",
+    "category": "Local authenticator",
+    "documentationUrl": "https://docs.wso2.com/display/ISCONNECTORS/X509Certificate+Authenticator",
+    "description": "The X509Certificate authenticator allows you to authenticate users using X509 certificate through the WSO2 Identity Server.",
+    "status": "Active",
+    "labels": ["Token","Twofactor"],
+    "releases": [
+        {
+            "tagName": "2.0.9",
+            "products": [
+                "IS 5.7.0"
+            ]
+        }
+    ]
+}
