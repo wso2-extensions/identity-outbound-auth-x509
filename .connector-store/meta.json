@@ -8,7 +8,7 @@
     "labels": ["Token", "Twofactor"],
     "releases": [
         {
-            "tagName": "2.0.9",
+            "tagName": "v2.0.9",
             "products": [
                 "IS 5.7.0"
             ]
