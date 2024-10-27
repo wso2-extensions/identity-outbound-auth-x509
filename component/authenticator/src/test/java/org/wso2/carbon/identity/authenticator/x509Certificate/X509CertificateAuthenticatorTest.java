@@ -33,6 +33,7 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
@@ -58,7 +59,7 @@ import static org.testng.Assert.fail;
  * Tests for X509CertificateAuthenticator.
  */
 @PrepareForTest({X509CertificateAuthenticator.class, X509CertificateUtil.class, FrameworkUtils.class, IdentityUtil
-        .class, AbstractUserStoreManager.class})
+        .class, AbstractUserStoreManager.class, IdentityTenantUtil.class})
 @PowerMockIgnore({ "javax.xml.*"})
 public class X509CertificateAuthenticatorTest {
 
@@ -443,6 +444,7 @@ public class X509CertificateAuthenticatorTest {
                 .validateCertificate(Matchers.anyString(), Matchers.any(AuthenticationContext.class), any(byte[].class),
                         Matchers.anyBoolean())).thenReturn(true);
         mockStatic(IdentityUtil.class);
+        mockStatic(IdentityTenantUtil.class);
         when(X509CertificateUtil
                 .isAccountLock(Matchers.anyString())).thenReturn(false);
         when(X509CertificateUtil
@@ -458,6 +460,7 @@ public class X509CertificateAuthenticatorTest {
         when(userStoreManagerMock.listUsers(anyString(), anyInt())).thenReturn(userList);
 
         when(IdentityUtil.getPrimaryDomainName()).thenReturn("PRIMARY");
+        when(IdentityTenantUtil.getTenantId("carbon.super")).thenReturn(-1234);
         if (exceptionShouldThrown) {
             try {
                 spy.process(mockRequest, mockResponse, authenticationContext);
