@@ -68,7 +68,7 @@ public class X509CertificateServiceComponent {
         try {
             X509CertificateDataHolder.getInstance().getHttpService()
                     .registerServlet(X509CertificateConstants.SERVLET_URL, servlet, null, null);
-            log.info("X509 Certificate Servlet activated successfully..");
+            log.debug("X509 Certificate Servlet activated successfully.");
         } catch (NamespaceException | ServletException e) {
             throw new RuntimeException("Error when registering X509 Certificate Servlet via the HttpService.", e);
         }
