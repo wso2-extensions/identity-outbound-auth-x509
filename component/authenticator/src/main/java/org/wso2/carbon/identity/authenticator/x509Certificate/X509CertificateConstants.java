@@ -73,5 +73,6 @@ public class X509CertificateConstants {
     public static final String SEARCH_ALL_USERSTORES = "SearchAllUserStores";
     public static final String LOGIN_CLAIM_URIS = "LoginClaimURIs";
     public static final String ACCOUNT_DISABLED_CLAIM = "http://wso2.org/claims/identity/accountDisabled";
+    public static final String USE_INTERNAL_HOSTNAME_FOR_REDIRECT = "UseInternalHostnameForRedirect";
 
 }

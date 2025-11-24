@@ -21,6 +21,7 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -64,8 +65,17 @@ public class X509CertificateServlet extends HttpServlet {
 
         String commonAuthURL;
         try {
-            commonAuthURL = ServiceURLBuilder.create().addPath(X509CertificateConstants.COMMON_AUTH).build()
-                    .getAbsoluteInternalURL();
+            // Check if internal hostname should be used for redirect.
+            boolean useInternalHostname = Boolean.parseBoolean(IdentityUtil.getProperty(
+                    X509CertificateConstants.USE_INTERNAL_HOSTNAME_FOR_REDIRECT));
+
+            if (useInternalHostname) {
+                commonAuthURL = ServiceURLBuilder.create().addPath(X509CertificateConstants.COMMON_AUTH).build()
+                        .getAbsoluteInternalURL();
+            } else {
+                commonAuthURL = ServiceURLBuilder.create().addPath(X509CertificateConstants.COMMON_AUTH).build()
+                        .getAbsolutePublicURL();
+            }
         } catch (URLBuilderException e) {
             throw new RuntimeException("Error occurred while building URL.", e);
         }
