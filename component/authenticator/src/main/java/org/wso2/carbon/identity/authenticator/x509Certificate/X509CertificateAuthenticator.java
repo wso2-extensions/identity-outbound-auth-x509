@@ -38,6 +38,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
 import org.wso2.carbon.identity.core.URLBuilderException;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.handler.event.account.lock.exception.AccountLockServiceException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -113,8 +114,17 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
             if (authenticationContext.isRetrying()) {
                 String errorPageUrl;
                 try {
-                    errorPageUrl = ServiceURLBuilder.create().addPath(X509CertificateConstants.ERROR_PAGE).build()
-                            .getAbsoluteInternalURL();
+                    // Check if internal hostname should be used for redirect.
+                    boolean useInternalHostname = Boolean.parseBoolean(IdentityUtil.getProperty(
+                            X509CertificateConstants.USE_INTERNAL_HOSTNAME_FOR_REDIRECT));
+
+                    if (useInternalHostname) {
+                        errorPageUrl = ServiceURLBuilder.create().addPath(X509CertificateConstants.ERROR_PAGE).build()
+                                .getAbsoluteInternalURL();
+                    } else {
+                        errorPageUrl = ServiceURLBuilder.create().addPath(X509CertificateConstants.ERROR_PAGE).build()
+                                .getAbsolutePublicURL();
+                    }
                 } catch (URLBuilderException e) {
                     throw new RuntimeException("Error occurred while building URL.", e);
                 }
