@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019-2025, WSO2 LLC. (http://www.wso2.com).
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -19,11 +19,11 @@
 
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
@@ -32,7 +32,6 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
-import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.user.api.UserRealm;
@@ -46,21 +45,18 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;
 
 /**
  * Tests for X509CertificateAuthenticator.
  */
-@PrepareForTest({X509CertificateAuthenticator.class, X509CertificateUtil.class, FrameworkUtils.class, IdentityUtil
-        .class, AbstractUserStoreManager.class, IdentityTenantUtil.class})
-@PowerMockIgnore({ "javax.xml.*"})
 public class X509CertificateAuthenticatorTest {
 
     private static final String CERT_WITH_NO_ALTERNATIVE_NAMES =
@@ -221,6 +217,27 @@ public class X509CertificateAuthenticatorTest {
 
     @Mock
     private AbstractUserStoreManager userStoreManagerMock;
+
+    private MockedStatic<X509CertificateUtil> x509CertificateUtilMock;
+    private MockedStatic<IdentityUtil> identityUtilMock;
+    private MockedStatic<IdentityTenantUtil> identityTenantUtilMock;
+
+    @BeforeMethod
+    public void setUp() {
+
+        MockitoAnnotations.openMocks(this);
+        x509CertificateUtilMock = mockStatic(X509CertificateUtil.class);
+        identityUtilMock = mockStatic(IdentityUtil.class);
+        identityTenantUtilMock = mockStatic(IdentityTenantUtil.class);
+    }
+
+    @AfterMethod
+    public void tearDown() {
+
+        x509CertificateUtilMock.close();
+        identityUtilMock.close();
+        identityTenantUtilMock.close();
+    }
 
     @DataProvider(name = "provideX509Certificates")
     public Object[][] provideTestData() throws Exception {
@@ -435,35 +452,30 @@ public class X509CertificateAuthenticatorTest {
         when(mockRequest.getAttribute(X509CertificateConstants.X_509_CERTIFICATE)).thenReturn(certificateArray);
         authenticationContext.setProperty(X509CertificateConstants.X_509_CERTIFICATE, certificateArray);
         X509CertificateAuthenticator x509CertificateAuthenticator = new MockX509CertificateAuthenticator();
-        X509CertificateAuthenticator spy = PowerMockito.spy(x509CertificateAuthenticator);
         SequenceConfig sequenceConfig = (SequenceConfig) object2;
         authenticationContext.setSequenceConfig(sequenceConfig);
-        doReturn(authenticatorConfig).when(spy, "getAuthenticatorConfig");
-        mockStatic(X509CertificateUtil.class);
-        when(X509CertificateUtil
-                .validateCertificate(Matchers.anyString(), Matchers.any(AuthenticationContext.class), any(byte[].class),
-                        Matchers.anyBoolean())).thenReturn(true);
-        mockStatic(IdentityUtil.class);
-        mockStatic(IdentityTenantUtil.class);
-        when(X509CertificateUtil
-                .isAccountLock(Matchers.anyString())).thenReturn(false);
-        when(X509CertificateUtil
-                .isAccountDisabled(Matchers.any(AuthenticatedUser.class))).thenReturn(false);
+        
+        x509CertificateUtilMock.when(() -> X509CertificateUtil
+                .validateCertificate(anyString(), any(AuthenticationContext.class), any(byte[].class),
+                        anyBoolean())).thenReturn(true);
+        x509CertificateUtilMock.when(() -> X509CertificateUtil
+                .isAccountLock(anyString())).thenReturn(false);
+        x509CertificateUtilMock.when(() -> X509CertificateUtil
+                .isAccountDisabled(any(AuthenticatedUser.class))).thenReturn(false);
 
-        when(X509CertificateUtil.getUserRealm(anyString())).thenReturn(userRealmMock);
+        x509CertificateUtilMock.when(() -> X509CertificateUtil.getUserRealm(anyString())).thenReturn(userRealmMock);
 
-        userStoreManagerMock = PowerMockito.mock(AbstractUserStoreManager.class);
         when(userRealmMock.getUserStoreManager()).thenReturn(userStoreManagerMock);
 
         String[] userList = new String[1];
         userList[0] = "STORE1/user1";
         when(userStoreManagerMock.listUsers(anyString(), anyInt())).thenReturn(userList);
 
-        when(IdentityUtil.getPrimaryDomainName()).thenReturn("PRIMARY");
-        when(IdentityTenantUtil.getTenantId("carbon.super")).thenReturn(-1234);
+        identityUtilMock.when(IdentityUtil::getPrimaryDomainName).thenReturn("PRIMARY");
+        identityTenantUtilMock.when(() -> IdentityTenantUtil.getTenantId("carbon.super")).thenReturn(-1234);
         if (exceptionShouldThrown) {
             try {
-                spy.process(mockRequest, mockResponse, authenticationContext);
+                x509CertificateAuthenticator.process(mockRequest, mockResponse, authenticationContext);
                 fail("expected exception to be thrown but nothing was thrown");
             } catch (AuthenticationFailedException exception) {
                 if (!exception.getMessage().equals(exceptionMessage)) {
@@ -471,8 +483,7 @@ public class X509CertificateAuthenticatorTest {
                 }
             }
         } else {
-            spy.process(mockRequest, mockResponse, authenticationContext);
+            x509CertificateAuthenticator.process(mockRequest, mockResponse, authenticationContext);
         }
     }
-
 }

@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022-2025, WSO2 LLC. (http://www.wso2.com).
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -20,11 +20,12 @@
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockTestCase;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
@@ -43,16 +44,15 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;
 
-@PrepareForTest({X509CertificateUtil.class, FileBasedConfigurationBuilder.class, IdentityTenantUtil.class,
-        X509CertificateRealmServiceComponent.class, AbstractUserStoreManager.class})
-@PowerMockIgnore({"javax.xml.*"})
-public class X509CertificateUtilTest extends PowerMockTestCase {
+public class X509CertificateUtilTest {
 
     private static final String CERT_WITH_ONE_CN_NO_AlTERNATIVE_NAMES =
             "MIIDhDCCAmwCCQCbjLuYujEEOjANBgkqhkiG9w0BAQsFADCBgjELMAkGA1UEBhMC\n"
@@ -85,6 +85,29 @@ public class X509CertificateUtilTest extends PowerMockTestCase {
     @Mock
     private RevocationValidationManagerImpl revocationValidationManagerImpl;
 
+    private MockedStatic<FileBasedConfigurationBuilder> fileBasedConfigurationBuilderMock;
+    private MockedStatic<IdentityTenantUtil> identityTenantUtilMock;
+    private MockedStatic<X509CertificateRealmServiceComponent> realmServiceComponentMock;
+    private MockedConstruction<RevocationValidationManagerImpl> revocationValidationManagerMock;
+
+    @BeforeMethod
+    public void setUp() {
+
+        MockitoAnnotations.openMocks(this);
+        fileBasedConfigurationBuilderMock = mockStatic(FileBasedConfigurationBuilder.class);
+        identityTenantUtilMock = mockStatic(IdentityTenantUtil.class);
+        realmServiceComponentMock = mockStatic(X509CertificateRealmServiceComponent.class);
+    }
+
+    @AfterMethod
+    public void tearDown() {
+
+        fileBasedConfigurationBuilderMock.close();
+        identityTenantUtilMock.close();
+        realmServiceComponentMock.close();
+        revocationValidationManagerMock.close();
+    }
+
     @Test(dataProvider = "x509CertificateUtilDataProvider")
     public void testValidateCertificate(String searchAllUserStores, String[] userList, boolean isUserExistsInStore,
                                         boolean expectedResult, boolean isExceptionExpected,
@@ -103,26 +126,24 @@ public class X509CertificateUtilTest extends PowerMockTestCase {
         parameterMap.put(X509CertificateConstants.SEARCH_ALL_USERSTORES, searchAllUserStores);
         authenticatorConfig.setParameterMap(parameterMap);
 
-        mockStatic(FileBasedConfigurationBuilder.class);
-        when(FileBasedConfigurationBuilder.getInstance()).thenReturn(fileBasedConfigurationBuilder);
+        fileBasedConfigurationBuilderMock.when(FileBasedConfigurationBuilder::getInstance)
+                .thenReturn(fileBasedConfigurationBuilder);
         when(fileBasedConfigurationBuilder.getAuthenticatorBean(X509CertificateConstants.AUTHENTICATOR_NAME))
                 .thenReturn(authenticatorConfig);
 
-        mockStatic(IdentityTenantUtil.class);
-        when(IdentityTenantUtil.getTenantId(anyString())).thenReturn(1);
+        identityTenantUtilMock.when(() -> IdentityTenantUtil.getTenantId(anyString())).thenReturn(1);
 
-        mockStatic(X509CertificateRealmServiceComponent.class);
-        when(X509CertificateRealmServiceComponent.getRealmService()).thenReturn(realmService);
+        realmServiceComponentMock.when(X509CertificateRealmServiceComponent::getRealmService)
+                .thenReturn(realmService);
         when(realmService.getTenantUserRealm(1)).thenReturn(userRealm);
 
-        userStoreManager = PowerMockito.mock(AbstractUserStoreManager.class);
-        when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+        AbstractUserStoreManager mockUserStoreManager = mock(AbstractUserStoreManager.class);
+        when(userRealm.getUserStoreManager()).thenReturn(mockUserStoreManager);
 
-        when(userStoreManager.listUsers(anyString(), anyInt())).thenReturn(userList);
-        when(userStoreManager.isExistingUser(anyString())).thenReturn(isUserExistsInStore);
+        when(mockUserStoreManager.listUsers(anyString(), anyInt())).thenReturn(userList);
+        when(mockUserStoreManager.isExistingUser(anyString())).thenReturn(isUserExistsInStore);
 
-        PowerMockito.whenNew(RevocationValidationManagerImpl.class).withNoArguments()
-                .thenReturn(revocationValidationManagerImpl);
+        revocationValidationManagerMock = mockConstruction(RevocationValidationManagerImpl.class);
 
         if (!isExceptionExpected) {
             boolean result =
