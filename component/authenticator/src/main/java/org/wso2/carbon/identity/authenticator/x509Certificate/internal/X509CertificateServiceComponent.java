@@ -20,36 +20,24 @@ package org.wso2.carbon.identity.authenticator.x509Certificate.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.equinox.http.helper.ContextPathServletAdaptor;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateAuthenticator;
-import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateConstants;
 import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateDataHolder;
-import org.wso2.carbon.identity.authenticator.x509Certificate.X509CertificateServlet;
 import org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import java.util.Hashtable;
 
-/**
- * @scr.component name="osgi.servlet.dscomponent" immediate=true
- * @scr.reference name="osgi.httpservice" interface="org.osgi.service.http.HttpService"
- * cardinality="1..1" policy="dynamic" bind="setHttpService"
- * unbind="unsetHttpService"
- * @scr.reference name="accountLockService"
- * interface="org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService"
- * cardinality="1..1" policy="dynamic" bind="setAccountLockService"
- * unbind="unsetAccountLockService"
- * @scr.reference name="osgi.user.realm.service.default" interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService"
- * unbind="unsetRealmService"
- */
-
+@Component(
+        name = "osgi.servlet.dscomponent",
+        immediate = true
+)
 public class X509CertificateServiceComponent {
     private static final Log log = LogFactory.getLog(X509CertificateServiceComponent.class);
 
@@ -58,20 +46,14 @@ public class X509CertificateServiceComponent {
      *
      * @param componentContext component context
      */
+    @Activate
     protected void activate(ComponentContext componentContext) {
         X509CertificateAuthenticator authenticator = new X509CertificateAuthenticator();
         Hashtable<String, String> props = new Hashtable<>();
         componentContext.getBundleContext()
                 .registerService(ApplicationAuthenticator.class.getName(), authenticator, props);
-        Servlet servlet = new ContextPathServletAdaptor(
-                new X509CertificateServlet(), X509CertificateConstants.SERVLET_URL);
-        try {
-            X509CertificateDataHolder.getInstance().getHttpService()
-                    .registerServlet(X509CertificateConstants.SERVLET_URL, servlet, null, null);
-            log.debug("X509 Certificate Servlet activated successfully.");
-        } catch (NamespaceException | ServletException e) {
-            throw new RuntimeException("Error when registering X509 Certificate Servlet via the HttpService.", e);
-        }
+
+        log.debug("X509 Certificate Servlet activated successfully.");
     }
 
     /**
@@ -85,30 +67,13 @@ public class X509CertificateServiceComponent {
         }
     }
 
-    /**
-     * Set httpservice.
-     *
-     * @param httpService http service
-     */
-    protected void setHttpService(HttpService httpService) {
-        X509CertificateDataHolder.getInstance().setHttpService(httpService);
-        if (log.isDebugEnabled()) {
-            log.debug("HTTP Service is set in the X509 Certificate Servlet");
-        }
-    }
-
-    /**
-     * Unset httpservice.
-     *
-     * @param httpService http service
-     */
-    protected void unsetHttpService(HttpService httpService) {
-        X509CertificateDataHolder.getInstance().setHttpService(null);
-        if (log.isDebugEnabled()) {
-            log.debug("HTTP Service is unset in the X509 Certificate Servlet");
-        }
-    }
-
+    @Reference(
+            name = "accountLockService",
+            service = AccountLockService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAccountLockService"
+    )
     protected void setAccountLockService(AccountLockService accountLockService) {
 
         X509CertificateDataHolder.getInstance().setAccountLockService(accountLockService);
@@ -119,6 +84,13 @@ public class X509CertificateServiceComponent {
         X509CertificateDataHolder.getInstance().setAccountLockService(null);
     }
 
+    @Reference(
+            name = "osgi.user.realm.service.default",
+            service = RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService"
+    )
     protected void setRealmService(RealmService realmService) {
 
         if (log.isDebugEnabled()) {

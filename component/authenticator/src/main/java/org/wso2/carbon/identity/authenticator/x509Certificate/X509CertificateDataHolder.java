@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
-import org.osgi.service.http.HttpService;
 import org.wso2.carbon.identity.handler.event.account.lock.service.AccountLockService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -28,7 +27,6 @@ import org.wso2.carbon.user.core.service.RealmService;
 public class X509CertificateDataHolder {
 
     private static volatile X509CertificateDataHolder dataHolder = null;
-    private HttpService httpService;
     private AccountLockService accountLockService;
     private RealmService realmService;
 
@@ -49,24 +47,6 @@ public class X509CertificateDataHolder {
             }
         }
         return dataHolder;
-    }
-
-    /**
-     * Get http service.
-     *
-     * @return http service
-     */
-    public HttpService getHttpService() {
-        return httpService;
-    }
-
-    /**
-     * Set http service.
-     *
-     * @return http service
-     */
-    public void setHttpService(HttpService httpService) {
-        this.httpService = httpService;
     }
 
     /**
