@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.identity.authenticator.x509Certificate;
 
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.core.ServiceURLBuilder;
@@ -25,6 +26,7 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +35,15 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * X509 Certificate Servlet.
  */
+@Component(
+        service = Servlet.class,
+        immediate = true,
+        property = {
+                "osgi.http.whiteboard.servlet.pattern=" + X509CertificateConstants.SERVLET_URL,
+                "osgi.http.whiteboard.servlet.name=X509CertificateServlet",
+                "osgi.http.whiteboard.servlet.asyncSupported=true"
+        }
+)
 public class X509CertificateServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7182121722709941646L;
