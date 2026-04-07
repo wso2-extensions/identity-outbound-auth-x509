@@ -22,11 +22,11 @@ package org.wso2.carbon.identity.authenticator.x509Certificate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.ssl.asn1.ASN1InputStream;
-import org.apache.commons.ssl.asn1.DEREncodable;
-import org.apache.commons.ssl.asn1.DERSequence;
-import org.apache.commons.ssl.asn1.DERTaggedObject;
-import org.apache.commons.ssl.asn1.DERUTF8String;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1String;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.LocalApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.StepConfig;
@@ -509,10 +509,17 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
-     * Get alternative name that match with the given regex from the certificate.
+     * Get alternative name that matches the given regex from the certificate.
+     * Handles all nine SAN types defined in RFC 5280. Types returned as String
+     * by the JDK (rfc822Name, dNSName, directoryName, URI, iPAddress, registeredID)
+     * are used directly. Types returned as raw DER byte[] by the JDK
+     * (otherName, x400Address, ediPartyName) are decoded via Bouncy Castle.
      *
      * @param cert                  x509 certificate.
-     * @param authenticationContext authenticationContext
+     * @param authenticationContext authentication context.
+     * @return the matched alternative name string.
+     * @throws AuthenticationFailedException if the certificate cannot be parsed, no SAN extension is found, or the
+     * configured regex produces no match or multiple matches.
      */
     private String getMatchedAlternativeName(X509Certificate cert, AuthenticationContext authenticationContext)
             throws AuthenticationFailedException {
@@ -520,30 +527,35 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
         Set<String> matchedAlternativeNamesList = new HashSet<>();
         try {
             Collection<List<?>> altNames = cert.getSubjectAlternativeNames();
-            if (altNames != null) {
-                for (List item : altNames) {
-                    ASN1InputStream decoder = null;
-                    if (item.toArray()[1] instanceof byte[]) {
-                        decoder = new ASN1InputStream((byte[]) item.toArray()[1]);
-                    } else if (item.toArray()[1] instanceof String) {
-                        Matcher m = alternativeNamesPatternCompiled.matcher((String) item.toArray()[1]);
-                        addMatchStringsToList(m, matchedAlternativeNamesList);
-                    }
-                    if (decoder == null) {
-                        continue;
-                    }
-                    String identity = decodeAlternativeName(decoder);
-                    Matcher m = alternativeNamesPatternCompiled.matcher(identity);
-                    addMatchStringsToList(m, matchedAlternativeNamesList);
-                }
-            } else {
+            if (altNames == null) {
                 authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
                         X509CertificateConstants.X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR_CODE);
                 throw new AuthenticationFailedException(
                         X509CertificateConstants.X509_CERTIFICATE_ALTERNATIVE_NAMES_NOTFOUND_ERROR);
             }
-        } catch (CertificateParsingException | IOException e) {
-            throw new AuthenticationFailedException("Failed to Parse the certificate");
+            for (List<?> item : altNames) {
+                Integer sanType = (Integer) item.get(0);
+                Object value = item.get(1);
+                String identity = null;
+                if (value instanceof String) {
+                    // Types 1,2,4,6,7,8 — JDK decodes these correctly including
+                    // IP addresses (type 7) as dotted decimal e.g. "192.168.1.1"
+                    identity = (String) value;
+                } else if (value instanceof byte[]) {
+                    // Types 0,3,5 — raw DER, decode via BC
+                    identity = decodeDerSanValue((byte[]) value);
+                }
+                if (identity == null || identity.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping SAN entry of type " + sanType + ": could not decode to a usable string.");
+                    }
+                    continue;
+                }
+                Matcher m = alternativeNamesPatternCompiled.matcher(identity);
+                addMatchStringsToList(m, matchedAlternativeNamesList);
+            }
+        } catch (CertificateParsingException e) {
+            throw new AuthenticationFailedException("Failed to Parse the certificate", e);
         }
         if (matchedAlternativeNamesList.isEmpty()) {
             authenticationContext.setProperty(X509CertificateConstants.X509_CERTIFICATE_ERROR_CODE,
@@ -559,17 +571,44 @@ public class X509CertificateAuthenticator extends AbstractApplicationAuthenticat
     }
 
     /**
-     * Get decoded alternative name.
+     * Decodes raw DER-encoded SAN byte[] values for the three types the JDK
+     * does not decode to String: otherName (0), x400Address (3), ediPartyName (5).
      *
-     * @param decoder ASN1 Decoder
+     * @param derBytes raw DER-encoded bytes as returned by the JDK's
+     *                 {@link java.security.cert.X509Certificate#getSubjectAlternativeNames()}
+     *                 for SAN types 0, 3, and 5.
+     * @return null if the value cannot be decoded — the caller skips the entry.
      */
-    private String decodeAlternativeName(ASN1InputStream decoder) throws IOException {
+    private String decodeDerSanValue(byte[] derBytes) throws AuthenticationFailedException {
 
-        DEREncodable encoded = decoder.readObject();
-        encoded = ((DERSequence) encoded).getObjectAt(1);
-        encoded = ((DERTaggedObject) encoded).getObject();
-        encoded = ((DERTaggedObject) encoded).getObject();
-        return  ((DERUTF8String) encoded).getString();
+        try (ASN1InputStream decoder = new ASN1InputStream(derBytes)) {
+
+            ASN1Primitive primitive = decoder.readObject();
+            // otherName: SEQUENCE { OID, [0] EXPLICIT value }
+            // Most common real-world case: Microsoft UPN carrying "user@domain.com"
+            if (primitive instanceof ASN1Sequence) {
+                ASN1Sequence seq = (ASN1Sequence) primitive;
+                if (seq.size() >= 2) {
+                    ASN1Primitive taggedWrapper = seq.getObjectAt(1).toASN1Primitive();
+                    if (taggedWrapper instanceof ASN1TaggedObject) {
+                        ASN1Primitive inner = ((ASN1TaggedObject) taggedWrapper).getBaseObject().toASN1Primitive();
+                        if (inner instanceof ASN1TaggedObject) {
+                            inner = ((ASN1TaggedObject) inner).getBaseObject().toASN1Primitive();
+                        }
+                        if (inner instanceof ASN1String) {
+                            return ((ASN1String) inner).getString();
+                        }
+                    }
+                }
+            }
+            // Fallback: if the primitive itself is a string (covers some x400Address/ediPartyName cases)
+            if (primitive instanceof ASN1String) {
+                return ((ASN1String) primitive).getString();
+            }
+        } catch (IOException e) {
+            throw new AuthenticationFailedException("Failed to Parse the certificate", e);
+        }
+        return null;
     }
 
     /**
