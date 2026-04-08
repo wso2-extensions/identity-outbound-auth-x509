@@ -87,7 +87,7 @@ public class X509CertificateUtilTest {
 
     private MockedStatic<FileBasedConfigurationBuilder> fileBasedConfigurationBuilderMock;
     private MockedStatic<IdentityTenantUtil> identityTenantUtilMock;
-    private MockedStatic<X509CertificateRealmServiceComponent> realmServiceComponentMock;
+    private MockedStatic<X509CertificateDataHolder> dataHolderMock;
     private MockedConstruction<RevocationValidationManagerImpl> revocationValidationManagerMock;
 
     @BeforeMethod
@@ -96,7 +96,7 @@ public class X509CertificateUtilTest {
         MockitoAnnotations.openMocks(this);
         fileBasedConfigurationBuilderMock = mockStatic(FileBasedConfigurationBuilder.class);
         identityTenantUtilMock = mockStatic(IdentityTenantUtil.class);
-        realmServiceComponentMock = mockStatic(X509CertificateRealmServiceComponent.class);
+        dataHolderMock = mockStatic(X509CertificateDataHolder.class);
     }
 
     @AfterMethod
@@ -104,7 +104,7 @@ public class X509CertificateUtilTest {
 
         fileBasedConfigurationBuilderMock.close();
         identityTenantUtilMock.close();
-        realmServiceComponentMock.close();
+        dataHolderMock.close();
         revocationValidationManagerMock.close();
     }
 
@@ -133,8 +133,9 @@ public class X509CertificateUtilTest {
 
         identityTenantUtilMock.when(() -> IdentityTenantUtil.getTenantId(anyString())).thenReturn(1);
 
-        realmServiceComponentMock.when(X509CertificateRealmServiceComponent::getRealmService)
-                .thenReturn(realmService);
+        X509CertificateDataHolder mockDataHolder = mock(X509CertificateDataHolder.class);
+        dataHolderMock.when(X509CertificateDataHolder::getInstance).thenReturn(mockDataHolder);
+        when(mockDataHolder.getRealmService()).thenReturn(realmService);
         when(realmService.getTenantUserRealm(1)).thenReturn(userRealm);
 
         AbstractUserStoreManager mockUserStoreManager = mock(AbstractUserStoreManager.class);
