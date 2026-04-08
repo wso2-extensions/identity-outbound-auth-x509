@@ -242,7 +242,7 @@ public class X509CertificateUtil {
             if (StringUtils.isNotEmpty(username)) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-                RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();
+                RealmService realmService = X509CertificateDataHolder.getInstance().getRealmService();
                 userRealm = realmService.getTenantUserRealm(tenantId);
             }
         } catch (UserStoreException e) {
@@ -268,7 +268,7 @@ public class X509CertificateUtil {
         try {
             if (StringUtils.isNotEmpty(tenantDomain)) {
                 int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
-                RealmService realmService = X509CertificateRealmServiceComponent.getRealmService();
+                RealmService realmService = X509CertificateDataHolder.getInstance().getRealmService();
                 userRealm = realmService.getTenantUserRealm(tenantId);
             }
         } catch (UserStoreException e) {

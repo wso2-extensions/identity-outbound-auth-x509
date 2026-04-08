@@ -27,7 +27,11 @@ import org.wso2.carbon.user.core.service.RealmService;
  * @scr.component name="org.wso2.carbon.identity.authentication.internal.X509CertificateRealmServiceComponent" immediate="true"
  * @scr.reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService"
  * cardinality="1..1" policy="dynamic" bind="setRealmService"  unbind="unsetRealmService"
+ * @deprecated Use {@link X509CertificateDataHolder} to obtain the {@link RealmService} instead.
+ *             This component uses legacy SCR Javadoc annotations that are no longer processed
+ *             by the modern DS runtime, so its RealmService reference is never populated.
  */
+@Deprecated
 public class X509CertificateRealmServiceComponent {
 
     private static final Log log = LogFactory.getLog(X509CertificateRealmServiceComponent.class);
